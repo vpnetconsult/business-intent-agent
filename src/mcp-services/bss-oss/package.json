@@ -1,0 +1,12 @@
+{
+  "name": "bss-oss-mcp-service",
+  "version": "1.0.0",
+  "description": "BSS/OSS MCP Service",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

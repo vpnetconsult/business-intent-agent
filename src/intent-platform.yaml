@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intent-platform
+  labels:
+    name: intent-platform
+    istio-injection: enabled

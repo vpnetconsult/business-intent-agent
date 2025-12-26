@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # Business Intent Agent
+  business-intent-agent:
+    build:
+      context: ./ai-agents/business-intent-agent
+      dockerfile: Dockerfile
+    image: vpnet/business-intent-agent:1.0.0
+    container_name: business-intent-agent
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - LOG_LEVEL=info
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CLAUDE_MODEL=claude-sonnet-4-20250514
+      - MCP_BSS_URL=http://bss-oss-mcp:8080
+      - MCP_KNOWLEDGE_GRAPH_URL=http://knowledge-graph-mcp:8080
+      - MCP_CUSTOMER_DATA_URL=http://customer-data-mcp:8080
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - intent-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - intent-network
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=intent_user
+      - POSTGRES_PASSWORD=intent_pass
+      - POSTGRES_DB=intent_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - intent-network
+    restart: unless-stopped
+
+  # Neo4j Graph Database
+  neo4j:
+    image: neo4j:5-enterprise
+    container_name: neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/password123
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j-data:/data
+    networks:
+      - intent-network
+    restart: unless-stopped
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - intent-network
+    restart: unless-stopped
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - intent-network
+    restart: unless-stopped
+
+networks:
+  intent-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  postgres-data:
+  neo4j-data:
+  prometheus-data:
+  grafana-data:

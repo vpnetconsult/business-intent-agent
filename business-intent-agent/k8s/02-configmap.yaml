@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: business-intent-agent-config
+  namespace: intent-platform
+data:
+  # Application settings
+  LOG_LEVEL: "info"
+  PORT: "8080"
+  NODE_ENV: "development"
+
+  # Claude AI settings
+  CLAUDE_MODEL: "claude-sonnet-4-20250514"
+  CLAUDE_MAX_TOKENS: "4000"
+  CLAUDE_TEMPERATURE: "0.7"
+
+  # MCP settings
+  MCP_TIMEOUT_MS: "10000"
+  MCP_RETRY_ATTEMPTS: "3"
+
+  # Business logic settings
+  DEFAULT_CURRENCY: "EUR"
+  MIN_ORDER_VALUE: "10.00"
+  MAX_BUNDLE_PRODUCTS: "5"
