@@ -1,5 +1,9 @@
 version: '3.8'
 
+# SECURITY: This file uses Docker secrets to avoid hardcoded credentials
+# Setup: Copy secrets/*.template files to secrets/*.txt and set secure passwords
+# See: SECURITY_SETUP.md for detailed instructions
+
 services:
   # Business Intent Agent
   business-intent-agent:
@@ -44,12 +48,14 @@ services:
     container_name: postgres
     environment:
       - POSTGRES_USER=intent_user
-      - POSTGRES_PASSWORD=intent_pass
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
       - POSTGRES_DB=intent_db
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    secrets:
+      - postgres_password
     networks:
       - intent-network
     restart: unless-stopped
@@ -59,16 +65,21 @@ services:
     image: neo4j:5-enterprise
     container_name: neo4j
     environment:
-      - NEO4J_AUTH=neo4j/password123
+      - NEO4J_AUTH=neo4j/__NEO4J_PASSWORD__
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
     ports:
       - "7474:7474"
       - "7687:7687"
     volumes:
       - neo4j-data:/data
+    secrets:
+      - neo4j_password
     networks:
       - intent-network
     restart: unless-stopped
+    # Note: Neo4j requires password in NEO4J_AUTH env var format
+    # Use entrypoint script to read from /run/secrets/neo4j_password
+    entrypoint: /bin/bash -c "export NEO4J_AUTH=\"neo4j/$$(cat /run/secrets/neo4j_password)\" && exec /startup/docker-entrypoint.sh neo4j"
 
   # Prometheus
   prometheus:
@@ -93,9 +104,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/grafana_password
     volumes:
       - grafana-data:/var/lib/grafana
+    secrets:
+      - grafana_password
     networks:
       - intent-network
     restart: unless-stopped
@@ -110,3 +123,12 @@ volumes:
   neo4j-data:
   prometheus-data:
   grafana-data:
+
+# Docker secrets - mounted at /run/secrets/<secret_name>
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  neo4j_password:
+    file: ./secrets/neo4j_password.txt
+  grafana_password:
+    file: ./secrets/grafana_password.txt

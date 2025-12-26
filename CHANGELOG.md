@@ -5,6 +5,86 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-12-26
+
+### Added
+
+#### Security Enhancements (NIST CSF 2.0 Compliance)
+
+- **API Authentication** - API key-based authentication for all endpoints
+  - Bearer token authentication on `/api/v1/intent` endpoint
+  - Customer ownership validation
+  - Admin endpoint for API key generation
+  - Comprehensive authentication documentation (API_AUTHENTICATION.md)
+
+- **Secrets Management** - Removed hardcoded credentials
+  - Docker Compose secrets infrastructure
+  - Automated secrets setup script (`setup-secrets.sh`)
+  - Template-based secret files (.txt.template)
+  - PostgreSQL, Neo4j, and Grafana passwords externalized
+  - Security setup documentation (SECURITY_SETUP.md)
+
+- **PII Masking** - GDPR-compliant data anonymization
+  - Automatic PII masking before sending to Claude AI
+  - SHA-256 hashing for personal identifiers (name, address)
+  - Removal of high-risk fields (email, phone, SSN)
+  - Location generalization (street address → city/country)
+  - Financial data generalization (exact credit score → tier)
+  - PII validation to prevent raw data leakage
+  - Comprehensive PII masking documentation (PII_MASKING.md)
+
+- **Prompt Injection Detection** - AI jailbreak protection
+  - Pattern-based detection (50+ attack signatures)
+  - Three-tier severity classification (high/medium/low)
+  - Automatic blocking of high-severity attacks
+  - Input sanitization (HTML/script removal, Unicode normalization)
+  - DoS prevention (input length limits)
+  - Confidence scoring for detections
+  - Comprehensive attack pattern documentation (PROMPT_INJECTION.md)
+
+- **Security Metrics** - Prometheus instrumentation
+  - `auth_success_total` - Successful authentication attempts
+  - `auth_failure_total` - Failed authentication attempts
+  - `prompt_injection_detections_total` - Prompt injection detections
+  - `pii_masking_operations_total` - PII masking operations by field/operation
+
+- **Dependency Management** - Supply chain security
+  - Pinned all dependency versions (removed ^ and ~)
+  - Added npm audit to build process
+  - Created GitHub Actions workflow for security scanning
+  - Trivy container vulnerability scanning
+  - CodeQL static analysis
+  - Dependency review for pull requests
+
+- **Security Documentation** - Governance and compliance
+  - SECURITY.md with vulnerability reporting process
+  - INCIDENT_RESPONSE.md with detailed runbooks
+  - API_AUTHENTICATION.md for authentication guide
+  - PII_MASKING.md for data protection guide
+  - PROMPT_INJECTION.md for attack prevention guide
+  - SECURITY_SETUP.md for secrets management
+
+### Changed
+
+- **docker-compose.yml** - Uses Docker secrets instead of hardcoded passwords
+- **.gitignore** - Excludes actual secret files, keeps templates
+- **Kubernetes deployment** - Mounts API authentication and PII masking secrets
+- **Kubernetes secrets template** - Includes DEFAULT_API_KEY, ADMIN_SECRET, and PII_HASH_SALT
+- **Intent processor** - Masks customer profile before sending to Claude AI
+- **API response** - Returns both original and masked profiles for transparency
+- **Logging** - Automatic PII redaction in all log output
+
+### Security
+
+- Implements NIST CSF 2.0 PR.AC-01 (Identity and Credential Management)
+- Implements NIST CSF 2.0 PR.DS-01 (Data-at-rest protection)
+- Implements GDPR Article 32 (Security of Processing)
+- Implements GDPR Article 5(1)(c) (Data Minimization)
+- Prevents unauthorized API access
+- Prevents PII exposure to third-party AI providers
+- Enforces customer data isolation
+- Audit logging of authentication and PII masking operations
+
 ## [1.0.0] - 2025-12-26
 
 ### Added

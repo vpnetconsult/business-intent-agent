@@ -11,6 +11,18 @@ AI-powered business intent processing system using Claude AI and microservices a
 - Docker installed
 - Anthropic API key
 
+### Security Setup (Required)
+
+⚠️ **IMPORTANT:** As of v1.1.0, hardcoded credentials have been removed for NIST CSF 2.0 compliance.
+
+```bash
+# Run automated secrets setup
+cd src
+./setup-secrets.sh
+```
+
+This generates secure random passwords for PostgreSQL, Neo4j, and Grafana. See [src/SECURITY_SETUP.md](src/SECURITY_SETUP.md) for details.
+
 ### Deployment
 
 ```bash

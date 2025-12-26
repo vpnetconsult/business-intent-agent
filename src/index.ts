@@ -8,6 +8,8 @@ import { MCPClient } from './mcp-client';
 import { IntentProcessor } from './intent-processor';
 import { logger } from './logger';
 import { metricsMiddleware, register } from './metrics';
+import { authenticateApiKey, validateCustomerOwnership, generateApiKey } from './auth';
+import { validateIntentInput } from './prompt-injection-detection';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -89,23 +91,72 @@ app.get('/metrics', async (req: Request, res: Response) => {
   res.end(await register.metrics());
 });
 
-// Process customer intent
-app.post('/api/v1/intent', async (req: Request, res: Response) => {
+// Admin endpoint to generate API keys (for development/testing)
+// Production: This should be replaced with proper admin authentication
+app.post('/api/v1/admin/generate-api-key', (req: Request, res: Response) => {
+  // Basic protection: require admin secret
+  const adminSecret = req.headers['x-admin-secret'];
+  const expectedSecret = process.env.ADMIN_SECRET || 'change-me-in-production';
+
+  if (adminSecret !== expectedSecret) {
+    logger.warn({ ip: req.ip }, 'Unauthorized API key generation attempt');
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Invalid admin secret',
+    });
+  }
+
+  const { customerId, name } = req.body;
+
+  if (!customerId || !name) {
+    return res.status(400).json({
+      error: 'Bad Request',
+      message: 'customerId and name are required',
+    });
+  }
+
+  const apiKey = generateApiKey(customerId, name);
+
+  logger.info({ customerId, name }, 'API key generated via admin endpoint');
+
+  res.json({
+    apiKey,
+    customerId,
+    name,
+    createdAt: new Date().toISOString(),
+    expiresAt: null, // TODO: Implement key expiration
+  });
+});
+
+// Process customer intent (PROTECTED ENDPOINT)
+app.post('/api/v1/intent', authenticateApiKey, validateCustomerOwnership, async (req: Request, res: Response) => {
   const startTime = Date.now();
-  
+
   try {
     const { customerId, intent, context } = req.body;
-    
+
     if (!customerId || !intent) {
       return res.status(400).json({
         error: 'Missing required fields: customerId, intent',
       });
     }
-    
-    logger.info({ customerId, intent }, 'Processing customer intent');
-    
-    // Process intent with Claude
-    const result = await intentProcessor.process(customerId, intent, context);
+
+    // Validate and sanitize intent input (prompt injection detection)
+    const validation = validateIntentInput(intent);
+    if (!validation.valid) {
+      logger.warn({ customerId, error: validation.error }, 'Intent validation failed');
+      return res.status(400).json({
+        error: 'Invalid input',
+        message: validation.error,
+      });
+    }
+
+    const sanitizedIntent = validation.sanitized || intent;
+
+    logger.info({ customerId, intent: sanitizedIntent }, 'Processing customer intent');
+
+    // Process intent with Claude (using sanitized input)
+    const result = await intentProcessor.process(customerId, sanitizedIntent, context);
     
     const processingTime = Date.now() - startTime;
     

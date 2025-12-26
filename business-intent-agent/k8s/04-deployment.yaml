@@ -78,6 +78,21 @@ spec:
             secretKeyRef:
               name: business-intent-agent-secrets
               key: mcp-customer-data-url
+        - name: DEFAULT_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: business-intent-agent-secrets
+              key: default-api-key
+        - name: ADMIN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: business-intent-agent-secrets
+              key: admin-secret
+        - name: PII_HASH_SALT
+          valueFrom:
+            secretKeyRef:
+              name: business-intent-agent-secrets
+              key: pii-hash-salt
 
         # Resource limits (adjusted for local development)
         resources:

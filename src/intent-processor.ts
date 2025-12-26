@@ -1,6 +1,7 @@
 import { ClaudeClient } from './claude-client';
 import { MCPClient } from './mcp-client';
 import { logger } from './logger';
+import { maskCustomerProfile, validateNoRawPII, redactForLogs } from './pii-masking';
 
 export class IntentProcessor {
   constructor(
@@ -23,9 +24,25 @@ export class IntentProcessor {
         { customer_id: customerId }
       );
 
-      // Step 2: Analyze intent with Claude
+      // Step 1.5: Mask PII before sending to external AI service
+      logger.info({ customerId }, 'Masking PII data for GDPR compliance');
+      const maskedProfile = maskCustomerProfile(customerProfile);
+
+      // Validate no raw PII remains
+      const validation = validateNoRawPII(maskedProfile);
+      if (!validation.valid) {
+        logger.error({ violations: validation.violations }, 'PII validation failed - raw PII detected');
+        throw new Error(`PII validation failed: ${validation.violations.join(', ')}`);
+      }
+
+      logger.debug({
+        originalProfile: redactForLogs(customerProfile),
+        maskedProfile
+      }, 'Customer profile masked');
+
+      // Step 2: Analyze intent with Claude (using masked profile)
       logger.info({ intent }, 'Analyzing intent with Claude');
-      const intentAnalysis = await this.claude.analyzeIntent(intent, customerProfile);
+      const intentAnalysis = await this.claude.analyzeIntent(intent, maskedProfile);
 
       // Step 3: Search product catalog
       logger.info({ tags: intentAnalysis.tags }, 'Searching product catalog');
@@ -44,11 +61,11 @@ export class IntentProcessor {
         { base_products: intentAnalysis.product_types }
       );
 
-      // Step 5: Generate personalized offer with Claude
+      // Step 5: Generate personalized offer with Claude (using masked profile)
       logger.info('Generating personalized offer');
       const offer = await this.claude.generateOffer({
         intent: intentAnalysis,
-        customer: customerProfile,
+        customer: maskedProfile, // Use masked profile, not raw
         products,
         bundles,
       });
@@ -68,7 +85,8 @@ export class IntentProcessor {
 
       return {
         intent_analysis: intentAnalysis,
-        customer_profile: customerProfile,
+        customer_profile: customerProfile, // Return original profile to authenticated client
+        customer_profile_masked: maskedProfile, // Also return masked version for transparency
         recommended_offer: offer,
         quote: quote,
         processing_time_ms: processingTime,

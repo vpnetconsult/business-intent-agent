@@ -43,5 +43,9 @@ temp/
 # Kubernetes secrets (don't commit actual secrets)
 **/01-secrets.yaml
 
+# Docker Compose secrets (don't commit actual secrets)
+src/secrets/*.txt
+!src/secrets/*.template
+
 # Neo4j data
 neo4j-data/
