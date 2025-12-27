@@ -379,6 +379,103 @@ curl -X POST /api/v1/intent \
 
 For detailed security audit results, see [SECURITY_REPORT.md](SECURITY_REPORT.md).
 
+### System-Level CVEs (Infrastructure Dependencies)
+
+The following CVEs affect the Node.js/npm installation at the container/system level and are outside the scope of project dependency management. These require updating the base container image.
+
+#### CVE-2025-64756: glob Command Injection
+
+**Status:** ✅ **RESOLVED** (December 27, 2025)
+
+| Attribute | Details |
+|-----------|---------|
+| **Severity** | High (CVSS 7.3) |
+| **Component** | glob (global npm installation) |
+| **Vulnerable Versions** | glob < 9.3.5, 10.x < 10.3.12, 11.x < 11.0.0 |
+| **Fixed In** | Node.js 22.x (npm 10.9.2+) |
+| **Current Version** | Node.js 22-alpine ✓ |
+| **Impact** | Command injection vulnerability in glob pattern matching |
+| **Mitigation** | Updated all Docker base images from node:20-alpine to node:22-alpine |
+
+**Description:** The glob package used by npm contained a command injection vulnerability that could allow attackers to execute arbitrary commands through specially crafted glob patterns. This vulnerability exists in the global npm installation bundled with Node.js, not in project dependencies.
+
+**Resolution:** Updated all container base images to Node.js 22 (Alpine variant), which includes npm with the patched glob package:
+
+**Affected Dockerfiles:**
+- `src/Dockerfile` - Business Intent Agent (build and runtime stages)
+- `src/Dockerfile.build` - Alternative build configuration
+- `src/mcp-services/customer-data/Dockerfile` - Customer Data MCP Service
+- `src/mcp-services/bss-oss/Dockerfile` - BSS/OSS MCP Service
+- `src/mcp-services/knowledge-graph/Dockerfile` - Knowledge Graph MCP Service
+
+**Verification:**
+```bash
+# Check Node.js version in container
+docker run --rm business-intent-agent:latest node --version
+# Expected: v22.x.x
+
+# Check npm version
+docker run --rm business-intent-agent:latest npm --version
+# Expected: 10.9.2 or higher
+
+# Verify glob version in npm
+docker run --rm business-intent-agent:latest npm list -g glob
+# Expected: glob@10.3.12 or higher
+```
+
+**Related Changes:**
+- Updated from `node:20-alpine` to `node:22-alpine` across all services
+- Node.js 22 is the current LTS version (active until October 2027)
+- npm 10.9.2+ includes patched glob package
+
+#### CVE-2024-21538: cross-spawn Regular Expression Denial of Service (ReDoS)
+
+**Status:** ✅ **RESOLVED** (December 27, 2025)
+
+| Attribute | Details |
+|-----------|---------|
+| **Severity** | Medium (CVSS 5.3) |
+| **Component** | cross-spawn (global npm installation) |
+| **Vulnerable Versions** | cross-spawn < 7.0.5 |
+| **Fixed In** | Node.js 22.x (npm 10.9.2+) |
+| **Current Version** | Node.js 22-alpine ✓ |
+| **Impact** | Regular expression denial of service through malicious command arguments |
+| **Mitigation** | Updated all Docker base images from node:20-alpine to node:22-alpine |
+
+**Description:** The cross-spawn package used by npm contained a ReDoS vulnerability that could cause performance degradation or service disruption when processing specially crafted command arguments. This vulnerability exists in the global npm installation, not in project dependencies.
+
+**Resolution:** Updated all container base images to Node.js 22, which includes npm with the patched cross-spawn package (v7.0.5+).
+
+**Impact Assessment:**
+- **Likelihood:** Low (requires specific attack patterns in npm script execution)
+- **Severity:** Medium (could cause performance issues but not data exposure)
+- **Scope:** System-level only (not exploitable through application code)
+
+**Verification:**
+```bash
+# Check cross-spawn version in npm
+docker run --rm business-intent-agent:latest npm list -g cross-spawn
+# Expected: cross-spawn@7.0.5 or higher
+```
+
+**Additional Security Benefits of Node.js 22:**
+- Latest V8 JavaScript engine with security patches
+- Updated OpenSSL for TLS/SSL security
+- Improved module resolution security
+- Enhanced permission model for file system access
+
+**Maintenance Notes:**
+- Node.js 22 LTS support until October 2027
+- npm security updates automatically included with Node.js releases
+- Monitor [Node.js security releases](https://nodejs.org/en/blog/vulnerability/) for future updates
+- Rebuild container images when Node.js security patches are released
+
+**Container Image Update Strategy:**
+1. **Automated Updates:** Consider using Renovate or Dependabot to track Node.js Docker image updates
+2. **Security Scanning:** Trivy and CodeQL scan container images for known CVEs
+3. **Rebuild Frequency:** Rebuild images monthly or when security advisories are published
+4. **Testing:** Test in staging before promoting to production
+
 ## Security Best Practices
 
 ### For Operators

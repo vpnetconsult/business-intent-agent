@@ -38,7 +38,7 @@ if (process.env.NODE_ENV === 'development' && API_KEYS.size === 0) {
     name: 'Development API Key',
     createdAt: new Date(),
   });
-  logger.warn({ apiKeyPrefix: defaultKey.substring(0, 8) + '...' }, 'Using development API key - NOT FOR PRODUCTION');
+  logger.warn('Using development API key - NOT FOR PRODUCTION');
 }
 
 /**
@@ -91,7 +91,6 @@ export function authenticateApiKey(req: Request, res: Response, next: NextFuncti
     logger.warn({
       ip: req.ip,
       path: req.path,
-      apiKeyPrefix: apiKey.substring(0, 8) + '...',
       duration: Date.now() - startTime,
     }, 'Authentication failed: Invalid API key');
 

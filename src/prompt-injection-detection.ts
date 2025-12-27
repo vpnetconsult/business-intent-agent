@@ -248,14 +248,14 @@ export function sanitizeInput(input: string): string {
     // Remove HTML tags (including malformed/nested ones)
     sanitized = sanitized.replace(/<[^>]*>/g, '');
 
-    // Remove script tags with any attributes or variations
-    sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gis, '');
+    // Remove script tags with any attributes or variations (including spaces in closing tags)
+    sanitized = sanitized.replace(/<script[^>]*>.*?<\/\s*script\s*>/gis, '');
 
     // Remove any remaining script-like patterns
     sanitized = sanitized.replace(/script/gi, '');
 
-    // Remove event handlers (comprehensive patterns)
-    sanitized = sanitized.replace(/on\w+\s*=\s*["']?[^"'\s>]*["']?/gi, '');
+    // Remove event handlers (comprehensive patterns) - remove entire attribute
+    sanitized = sanitized.replace(/\s*on\w+\s*=\s*["']?[^"'\s>]*["']?/gi, '');
   }
 
   // Remove JavaScript protocol (after loop to catch encoded versions)

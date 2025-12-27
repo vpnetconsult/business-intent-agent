@@ -1,6 +1,5 @@
 import { IntentProcessor } from '../src/intent-processor';
 import { ClaudeClient } from '../src/claude-client';
-import { MCPClient } from '../src/mcp-client';
 
 describe('IntentProcessor', () => {
   let processor: IntentProcessor;

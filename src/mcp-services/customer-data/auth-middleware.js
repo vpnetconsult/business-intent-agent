@@ -41,8 +41,7 @@ function authenticateAPIKey(req, res, next) {
     console.error('[auth] Invalid API key attempt', {
       ip: req.ip,
       path: req.path,
-      timestamp: new Date().toISOString(),
-      keyPrefix: apiKey.substring(0, 8) + '...'
+      timestamp: new Date().toISOString()
     });
     return res.status(403).json({
       error: 'Authentication failed',
@@ -52,9 +51,8 @@ function authenticateAPIKey(req, res, next) {
 
   // Success - attach key metadata to request
   req.authenticated = true;
-  req.apiKeyHash = hashApiKey(apiKey);
+  req.apiKeyIdentifier = `key_${Date.now()}`; // Non-sensitive identifier for this request
   console.log('[auth] Authenticated request', {
-    keyHash: req.apiKeyHash,
     path: req.path,
     timestamp: new Date().toISOString()
   });
@@ -71,7 +69,7 @@ function rateLimiter(options = {}) {
   const maxRequests = options.max || 100; // 100 requests per window
 
   return (req, res, next) => {
-    const key = req.apiKeyHash || req.ip;
+    const key = req.apiKeyIdentifier || req.ip;
     const now = Date.now();
 
     // Get or create rate limit entry
@@ -88,7 +86,6 @@ function rateLimiter(options = {}) {
     entry.count++;
     if (entry.count > maxRequests) {
       console.warn('[auth] Rate limit exceeded', {
-        key: key.substring(0, 16) + '...',
         count: entry.count,
         limit: maxRequests,
         path: req.path
@@ -169,7 +166,6 @@ function auditLogger(serviceName) {
         statusCode: res.statusCode,
         duration: `${duration}ms`,
         authenticated: req.authenticated || false,
-        keyHash: req.apiKeyHash || 'none',
         ip: req.ip,
         userAgent: req.headers['user-agent']?.substring(0, 100) || 'unknown'
       };
@@ -183,17 +179,6 @@ function auditLogger(serviceName) {
 
     next();
   };
-}
-
-/**
- * Hash API key for logging (never log raw keys)
- * Uses HMAC-SHA256 for better security than plain SHA-256
- * Note: This is for audit logging obfuscation, not authentication
- */
-function hashApiKey(apiKey) {
-  // Use HMAC for logging hash (not for authentication/verification)
-  const secret = process.env.LOG_HASH_SECRET || 'default-log-secret-change-in-production';
-  return crypto.createHmac('sha256', secret).update(apiKey).digest('hex').substring(0, 16);
 }
 
 /**
