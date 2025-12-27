@@ -256,7 +256,6 @@ export function sanitizeInput(input: string): string {
   sanitized = sanitized.replace(/\s{3,}/g, ' ');
 
   // Remove control characters (except newline, tab)
-  // eslint-disable-next-line no-control-regex
   sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
 
   // Normalize Unicode

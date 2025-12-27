@@ -33,7 +33,7 @@ export class MCPClient {
     try {
       const response = await this.client.get('/health');
       return response.status === 200;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

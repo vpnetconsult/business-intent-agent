@@ -77,7 +77,7 @@ app.get('/ready', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Readiness check failed', error);
+    logger.error({ err: error }, 'Readiness check failed');
     res.status(503).json({
       status: 'not ready',
       error: (error as Error).message,
