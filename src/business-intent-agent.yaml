@@ -36,6 +36,11 @@ spec:
             secretKeyRef:
               name: anthropic-api-key
               key: key
+        - name: MCP_API_KEY_BUSINESS_INTENT
+          valueFrom:
+            secretKeyRef:
+              name: mcp-api-keys
+              key: MCP_API_KEY_BUSINESS_INTENT
         - name: MCP_BSS_URL
           value: "http://bss-oss-mcp-service:8080"
         - name: MCP_KNOWLEDGE_GRAPH_URL

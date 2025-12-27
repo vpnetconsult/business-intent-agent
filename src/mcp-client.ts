@@ -4,14 +4,22 @@ import { logger } from './logger';
 export class MCPClient {
   private client: AxiosInstance;
   private baseURL: string;
+  private apiKey: string;
 
-  constructor(baseURL: string) {
+  constructor(baseURL: string, apiKey?: string) {
     this.baseURL = baseURL;
+    this.apiKey = apiKey || process.env.MCP_API_KEY_BUSINESS_INTENT || '';
+
+    if (!this.apiKey) {
+      logger.warn({ baseURL }, 'MCP Client initialized without API key');
+    }
+
     this.client = axios.create({
       baseURL,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
+        'X-API-Key': this.apiKey,
       },
     });
   }

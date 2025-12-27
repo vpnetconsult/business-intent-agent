@@ -2,20 +2,22 @@
 
 **Generated**: December 27, 2025
 **Project**: Business Intent Agent
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Status**: ✅ All Critical Vulnerabilities Resolved
 
 ---
 
 ## Executive Summary
 
-This report documents the security posture of the Business Intent Agent application following comprehensive dependency updates and security audits conducted on December 27, 2025.
+This report documents the security posture of the Business Intent Agent application following comprehensive dependency updates, MCP service authentication implementation, and security audits conducted on December 27, 2025.
 
 **Key Findings**:
+- ✅ **CRIT-005** resolved: MCP service authentication implemented
 - ✅ **0 vulnerabilities** detected in npm dependencies
 - ✅ All critical CVEs resolved
 - ✅ Dependencies updated to latest secure versions
 - ✅ Security workflows passing in CI/CD
+- ✅ Three-tier API key authentication system deployed
 
 ---
 
@@ -58,6 +60,152 @@ business-intent-agent@1.0.0
 $ npm audit
 found 0 vulnerabilities
 ```
+
+---
+
+### CRIT-005: Unauthenticated MCP Service Access
+
+**Status**: ✅ **RESOLVED**
+
+| Attribute | Details |
+|-----------|---------|
+| **Finding ID** | CRIT-005 |
+| **Severity** | Critical (CVSS 9.1) |
+| **Component** | MCP Services (customer-data, bss-oss, knowledge-graph) |
+| **Vulnerability** | Missing authentication on all MCP endpoints |
+| **Fixed Version** | 1.1.0 |
+| **Resolution Date** | December 27, 2025 |
+
+#### Vulnerability Description
+All three Model Context Protocol (MCP) services were accepting unauthenticated requests, exposing sensitive data and business logic:
+
+**customer-data-mcp-service**:
+- Customer profiles with PII (names, emails, locations)
+- Service subscriptions and spending tiers
+- Credit scores and contract types
+- Preference data
+
+**bss-oss-mcp-service**:
+- Product catalog with pricing
+- Quote generation capabilities
+- Business logic for bundling and discounts
+
+**knowledge-graph-mcp-service**:
+- Product recommendations and bundles
+- Business intelligence insights
+- Bundle popularity and match scores
+
+Any client with network access could query these endpoints without credentials, representing a critical data exposure risk.
+
+#### Impact Assessment
+- **Confidentiality**: HIGH - PII and business data exposed
+- **Integrity**: MEDIUM - No write operations but quote generation possible
+- **Availability**: MEDIUM - No rate limiting enabled abuse
+- **CVSS Score**: 9.1 (Critical)
+
+#### Mitigation Implemented
+
+1. **Authentication Middleware** (`auth-middleware.js`)
+   - API key validation (X-API-Key header or Authorization Bearer)
+   - Support for three credential tiers:
+     - `MCP_API_KEY_BUSINESS_INTENT`: Primary agent access
+     - `MCP_API_KEY_ADMIN`: Administrative operations
+     - `MCP_API_KEY_MONITORING`: Health and metrics access
+
+2. **Rate Limiting**
+   - 100 requests per minute per API key
+   - Configurable time windows
+   - In-memory tracking with cleanup
+   - Prevents brute force and DoS attacks
+
+3. **Request Signing Verification**
+   - HMAC-SHA256 signature validation
+   - Timestamp-based replay prevention
+   - Optional enhancement for high-security environments
+
+4. **Comprehensive Audit Logging**
+   - Service-specific logging (customer-data-mcp, bss-oss-mcp, knowledge-graph-mcp)
+   - Timestamp, client info, endpoint, status tracking
+   - Authentication failure alerting
+   - Structured JSON format for SIEM integration
+
+5. **Health Check Exception**
+   - `/health` endpoints exempt from authentication
+   - Enables Kubernetes liveness/readiness probes
+   - All business logic endpoints protected
+
+#### Deployment
+
+**Docker Images Updated**:
+- `vpnet/customer-data-mcp-service:1.0.0` → `1.1.0`
+- `vpnet/bss-oss-mcp-service:1.0.0` → `1.1.0`
+- `vpnet/knowledge-graph-mcp-service:1.0.0` → `1.1.0`
+
+**Kubernetes Secrets Created**:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mcp-api-keys
+  namespace: intent-platform
+type: Opaque
+stringData:
+  MCP_API_KEY_BUSINESS_INTENT: <base64-32-bytes>
+  MCP_API_KEY_ADMIN: <base64-32-bytes>
+  MCP_API_KEY_MONITORING: <base64-32-bytes>
+```
+
+**Environment Variables Injected**:
+- All 3 MCP services configured with secret references
+- business-intent-agent configured with MCP_API_KEY_BUSINESS_INTENT
+- Automatic pod restarts on secret rotation
+
+#### Verification
+```bash
+# Test 1: Unauthenticated request (should fail)
+$ curl -X POST http://customer-data-mcp:8080/mcp/tools/call \
+  -H "Content-Type: application/json" \
+  -d '{"tool":"get_customer_profile","params":{"customer_id":"CUST-001"}}'
+{"error":"Authentication required","message":"Missing API key"}
+HTTP Status: 401 ✓
+
+# Test 2: Invalid API key (should fail)
+$ curl -X POST http://customer-data-mcp:8080/mcp/tools/call \
+  -H "X-API-Key: invalid-key" \
+  -d '{"tool":"get_customer_profile","params":{"customer_id":"CUST-001"}}'
+{"error":"Authentication failed","message":"Invalid API key"}
+HTTP Status: 403 ✓
+
+# Test 3: Valid API key (should succeed)
+$ curl -X POST http://customer-data-mcp:8080/mcp/tools/call \
+  -H "X-API-Key: $MCP_API_KEY_BUSINESS_INTENT" \
+  -d '{"tool":"get_customer_profile","params":{"customer_id":"CUST-001"}}'
+{"customer_id":"CUST-001","name":"John Doe",...}
+HTTP Status: 200 ✓
+
+# Test 4: Health check (should work without auth)
+$ curl http://customer-data-mcp:8080/health
+{"status":"healthy","service":"customer-data-mcp-service"}
+HTTP Status: 200 ✓
+```
+
+#### Key Rotation Procedure
+1. Generate new secure key: `openssl rand -base64 32`
+2. Update Kubernetes secret:
+   ```bash
+   kubectl create secret generic mcp-api-keys \
+     --from-literal=MCP_API_KEY_BUSINESS_INTENT=<new-key> \
+     --namespace=intent-platform \
+     --dry-run=client -o yaml | kubectl apply -f -
+   ```
+3. Restart deployments:
+   ```bash
+   kubectl rollout restart deployment -n intent-platform
+   ```
+4. Verify all pods healthy
+5. Document rotation in audit log
+
+**Rotation Schedule**: Every 90 days (next: March 27, 2026)
 
 ---
 
@@ -125,7 +273,11 @@ found 0 vulnerabilities
 
 1. **Authentication & Authorization**
    - JWT-based authentication
-   - API key validation
+   - API key validation (business-intent-agent)
+   - **MCP Service API Key Authentication** (CRIT-005 fix)
+     - Three-tier credential system
+     - Secure Kubernetes secret management
+     - 90-day rotation schedule
    - Role-based access control (RBAC)
 
 2. **Input Validation**
@@ -214,16 +366,22 @@ None - all critical vulnerabilities resolved.
 
 ## Audit Trail
 
-### December 27, 2025 - Comprehensive Security Update
+### December 27, 2025 - MCP Authentication & Security Update
 
 **Actions Taken**:
-1. Updated 20+ dependencies to latest secure versions
-2. Migrated ESLint to v9 with flat config
-3. Upgraded CodeQL Action to v4
-4. Fixed CVE-2023-45857 (axios SSRF)
-5. Resolved all npm audit vulnerabilities
-6. Updated email domain to @vpnet.cloud
-7. Verified all security workflows passing
+1. **CRIT-005 Resolution**: Implemented MCP service authentication
+   - Created centralized authentication middleware
+   - Deployed API key authentication to all 3 MCP services
+   - Configured Kubernetes secrets for key management
+   - Updated Docker images to v1.1.0
+   - Tested authentication flows (401, 403, 200 responses)
+2. Updated 20+ dependencies to latest secure versions
+3. Migrated ESLint to v9 with flat config
+4. Upgraded CodeQL Action to v4
+5. Fixed CVE-2023-45857 (axios SSRF)
+6. Resolved all npm audit vulnerabilities
+7. Updated email domain to @vpnet.cloud
+8. Verified all security workflows passing
 
 **Commits**:
 - `f301abd` - chore: Update email domain

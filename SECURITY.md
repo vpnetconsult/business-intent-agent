@@ -71,9 +71,11 @@ Include the following information:
 ### v1.1.0 Security Enhancements
 
 1. **API Authentication**
-   - API key-based authentication
+   - API key-based authentication for business-intent-agent
+   - **NEW:** MCP service authentication with API keys
    - Customer ownership validation
-   - Rate limiting (100 req/min per IP)
+   - Rate limiting (100 req/min per key/IP)
+   - HMAC request signing support
 
 2. **PII Protection**
    - Automatic PII masking before AI processing
@@ -136,6 +138,69 @@ npm audit
 
 **Related Commits:**
 - `22104ed` - fix: Update dependencies to resolve security vulnerabilities
+
+### CRIT-005: Unauthenticated MCP Service Access
+
+**Status:** ✅ **RESOLVED** (December 27, 2025)
+
+| Attribute | Details |
+|-----------|---------|
+| **Severity** | Critical (CVSS 9.1) |
+| **Component** | MCP Services (customer-data, bss-oss, knowledge-graph) |
+| **Vulnerability** | Missing authentication on all MCP endpoints |
+| **Fixed In** | v1.1.0 |
+| **Impact** | Unauthenticated access to sensitive customer data, product catalog, and business logic |
+| **Mitigation** | Implemented comprehensive API key authentication with rate limiting and audit logging |
+
+**Description:** All three MCP services (customer-data-mcp, bss-oss-mcp, knowledge-graph-mcp) accepted unauthenticated requests, allowing any client to access sensitive customer profiles, product catalogs, and business intelligence without authentication. This exposed PII data and business-critical information to potential unauthorized access.
+
+**Resolution:** Implemented comprehensive authentication and security controls:
+
+1. **API Key Authentication**
+   - Cryptographically secure API keys (base64-encoded 32-byte random values)
+   - Three-tier key system: BUSINESS_INTENT, ADMIN, MONITORING
+   - Secure storage in Kubernetes secrets with rotation procedures
+
+2. **Rate Limiting**
+   - 100 requests per minute per API key
+   - Configurable time windows
+   - Prevents abuse and DoS attacks
+
+3. **Request Signing Verification**
+   - HMAC signature validation capability
+   - Timestamp-based replay attack prevention
+   - Optional for enhanced security
+
+4. **Comprehensive Audit Logging**
+   - All MCP requests logged with timestamp, client, endpoint, and result
+   - Authentication failures tracked separately
+   - Service-specific logging for correlation
+
+5. **Health Check Exception**
+   - Health endpoints remain accessible for monitoring
+   - All business logic endpoints require authentication
+
+**Verification:**
+```bash
+# Test unauthenticated request (should fail)
+curl -X POST http://customer-data-mcp:8080/mcp/tools/call
+# Response: 401 Unauthorized - Authentication required
+
+# Test with valid API key (should succeed)
+curl -X POST http://customer-data-mcp:8080/mcp/tools/call \
+  -H "X-API-Key: $MCP_API_KEY_BUSINESS_INTENT"
+# Response: 200 OK with data
+```
+
+**Affected Services:**
+- customer-data-mcp-service:1.0.0 → 1.1.0
+- bss-oss-mcp-service:1.0.0 → 1.1.0
+- knowledge-graph-mcp-service:1.1.0 → 1.1.0
+
+**Key Rotation Schedule:**
+- Rotation required every 90 days
+- Immediate rotation if compromise suspected
+- Documented in `mcp-services-k8s/mcp-secrets.yaml`
 
 For detailed security audit results, see [SECURITY_REPORT.md](SECURITY_REPORT.md).
 

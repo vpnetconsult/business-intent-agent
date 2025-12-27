@@ -1,15 +1,32 @@
 const express = require('express');
+const {
+  authenticateAPIKey,
+  rateLimiter,
+  verifyRequestSignature,
+  auditLogger,
+  healthCheckException
+} = require('./auth-middleware');
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 
-// Health check endpoint
+// Apply audit logging to all requests
+app.use(auditLogger('customer-data-mcp'));
+
+// Health check endpoint (no authentication required)
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', service: 'customer-data-mcp-service' });
 });
 
-// MCP tool call endpoint
+// Apply authentication and rate limiting to MCP endpoints
+app.use('/mcp/*', healthCheckException);
+app.use('/mcp/*', authenticateAPIKey);
+app.use('/mcp/*', rateLimiter({ max: 100, windowMs: 60000 }));
+app.use('/mcp/*', verifyRequestSignature);
+
+// MCP tool call endpoint (now protected)
 app.post('/mcp/tools/call', (req, res) => {
   const { tool, params } = req.body;
 
