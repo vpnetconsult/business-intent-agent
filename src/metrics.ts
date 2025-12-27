@@ -52,7 +52,7 @@ export const authFailureCounter = new client.Counter({
 export const promptInjectionDetections = new client.Counter({
   name: 'prompt_injection_detections_total',
   help: 'Total number of prompt injection attempts detected',
-  labelNames: ['severity'],
+  labelNames: ['severity', 'pattern'],
   registers: [register],
 });
 
