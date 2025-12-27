@@ -5,8 +5,6 @@
  * Security: Protects against unauthorized access to sensitive MCP endpoints
  */
 
-const crypto = require('crypto');
-
 // API keys should be set via environment variables
 const VALID_API_KEYS = new Set([
   process.env.MCP_API_KEY_BUSINESS_INTENT,

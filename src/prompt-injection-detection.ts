@@ -245,17 +245,23 @@ export function sanitizeInput(input: string): string {
   while (sanitized.length !== previousLength) {
     previousLength = sanitized.length;
 
-    // Remove HTML tags (including malformed/nested ones)
-    sanitized = sanitized.replace(/<[^>]*>/g, '');
+    // Remove script tags with any attributes or variations (handles all whitespace including tabs/newlines)
+    // This pattern matches <script...>...</script> with any whitespace in closing tag
+    sanitized = sanitized.replace(/<script[^>]*>.*?<\/\s*script[\s\S]*?>/gis, '');
 
-    // Remove script tags with any attributes or variations (including spaces in closing tags)
-    sanitized = sanitized.replace(/<script[^>]*>.*?<\/\s*script\s*>/gis, '');
-
-    // Remove any remaining script-like patterns
+    // Remove any remaining script-like patterns (case insensitive)
     sanitized = sanitized.replace(/script/gi, '');
 
-    // Remove event handlers (comprehensive patterns) - remove entire attribute
-    sanitized = sanitized.replace(/\s*on\w+\s*=\s*["']?[^"'\s>]*["']?/gi, '');
+    // Remove all HTML tags (including malformed/nested ones)
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+
+    // Remove event handlers comprehensively - handle all variations
+    // Remove patterns like: onclick="..." or onclick='...' or onclick=...
+    sanitized = sanitized.replace(/\bon\w+\s*=\s*["'][^"']*["']/gi, '');
+    sanitized = sanitized.replace(/\bon\w+\s*=\s*[^\s>]*/gi, '');
+
+    // Remove any remaining 'on' followed by word characters that might be event handlers
+    sanitized = sanitized.replace(/\bon[a-z]+/gi, '');
   }
 
   // Remove JavaScript protocol (after loop to catch encoded versions)
