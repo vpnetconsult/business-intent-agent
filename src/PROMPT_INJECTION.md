@@ -410,7 +410,7 @@ kubectl set image deployment/business-intent-agent app=vpnet/business-intent-age
 ## Support
 
 For prompt injection incidents:
-- **Email:** security@vpnet.consulting
+- **Email:** security@vpnet.cloud
 - **Incident Response:** Follow INCIDENT_RESPONSE.md
 - **Pattern Contributions:** GitHub Pull Requests welcome
 

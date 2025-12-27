@@ -253,10 +253,10 @@ If rollback is needed:
 
 | Role | Contact | Availability |
 |------|---------|--------------|
-| **DevOps Lead** | devops@vpnet.consulting | 24/7 |
-| **Security Engineer** | security@vpnet.consulting | 24/7 |
-| **CISO** | ciso@vpnet.consulting | Business hours + critical |
-| **CTO** | cto@vpnet.consulting | Business hours + critical |
+| **DevOps Lead** | devops@vpnet.cloud | 24/7 |
+| **Security Engineer** | security@vpnet.cloud | 24/7 |
+| **CISO** | ciso@vpnet.cloud | Business hours + critical |
+| **CTO** | cto@vpnet.cloud | Business hours + critical |
 
 ---
 

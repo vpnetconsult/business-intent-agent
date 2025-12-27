@@ -414,9 +414,9 @@ Before production launch:
 ## Support
 
 For PII masking questions:
-- **Email:** privacy@vpnet.consulting
-- **DPO (Data Protection Officer):** dpo@vpnet.consulting
-- **Security:** security@vpnet.consulting
+- **Email:** privacy@vpnet.cloud
+- **DPO (Data Protection Officer):** dpo@vpnet.cloud
+- **Security:** security@vpnet.cloud
 
 ---
 

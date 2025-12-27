@@ -324,7 +324,7 @@ The following authentication features are planned:
 ## Support
 
 For authentication-related issues:
-- Email: security@vpnet.consulting
+- Email: security@vpnet.cloud
 - Incident Response: Follow INCIDENT_RESPONSE.md
 - Security Vulnerability: See SECURITY.md
 

@@ -70,11 +70,11 @@ If personal data is involved, assess if it's a "data breach" under GDPR Article 
 | Role | Responsibilities | Contact |
 |------|------------------|---------|
 | **Incident Commander** | Lead response, make decisions | CISO |
-| **Security Engineer** | Investigate, contain, remediate | security@vpnet.consulting |
-| **DevOps Lead** | System access, deployment, rollback | devops@vpnet.consulting |
-| **Legal Counsel** | Regulatory compliance, liability | legal@vpnet.consulting |
-| **PR/Comms** | External communication, customer notification | pr@vpnet.consulting |
-| **Data Protection Officer** | GDPR compliance, DPA notification | dpo@vpnet.consulting |
+| **Security Engineer** | Investigate, contain, remediate | security@vpnet.cloud |
+| **DevOps Lead** | System access, deployment, rollback | devops@vpnet.cloud |
+| **Legal Counsel** | Regulatory compliance, liability | legal@vpnet.cloud |
+| **PR/Comms** | External communication, customer notification | pr@vpnet.cloud |
+| **Data Protection Officer** | GDPR compliance, DPA notification | dpo@vpnet.cloud |
 
 ### On-Call Rotation
 
@@ -86,7 +86,7 @@ If personal data is involved, assess if it's a "data breach" under GDPR Article 
 
 - **War Room:** Slack #incident-response
 - **Video Call:** Zoom (link in Slack channel description)
-- **Email:** incident-response@vpnet.consulting
+- **Email:** incident-response@vpnet.cloud
 - **Phone:** PagerDuty alert system
 
 ---
@@ -390,7 +390,7 @@ What You Should Do:
 [Customer actions, if any]
 
 Contact:
-security@vpnet.consulting
+security@vpnet.cloud
 
 We sincerely apologize for any inconvenience.
 
@@ -584,7 +584,7 @@ Vpnet Consulting LLC
 | Anthropic Support | - | - | support@anthropic.com |
 | AWS Support | - | +1-XXX | - |
 | Irish DPA | - | +353 XXX | info@dataprotection.ie |
-| Legal Counsel | - | +1-XXX | legal@vpnet.consulting |
+| Legal Counsel | - | +1-XXX | legal@vpnet.cloud |
 
 ### Useful Commands
 

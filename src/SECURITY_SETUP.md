@@ -217,7 +217,7 @@ This secrets management approach addresses:
 ## Support
 
 For security-related questions:
-- Email: security@vpnet.consulting
+- Email: security@vpnet.cloud
 - Incident Response: Follow INCIDENT_RESPONSE.md
 
 ---

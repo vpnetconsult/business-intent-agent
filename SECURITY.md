@@ -16,7 +16,7 @@ We take the security of the Business Intent Agent seriously. If you discover a s
 
 **DO NOT** create a public GitHub issue for security vulnerabilities.
 
-Instead, please email: **security@vpnet.consulting**
+Instead, please email: **security@vpnet.cloud**
 
 Include the following information:
 - Description of the vulnerability
@@ -207,9 +207,9 @@ See [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) for detailed procedures.
 
 ## Security Contacts
 
-- **Security Team:** security@vpnet.consulting
-- **Data Protection Officer:** dpo@vpnet.consulting
-- **CISO:** ciso@vpnet.consulting
+- **Security Team:** security@vpnet.cloud
+- **Data Protection Officer:** dpo@vpnet.cloud
+- **CISO:** ciso@vpnet.cloud
 - **24/7 Hotline:** +1-XXX-XXX-XXXX (Production only)
 
 ## Bug Bounty Program
