@@ -11,7 +11,7 @@ import { metricsMiddleware, register } from './metrics';
 import { authenticateApiKey, validateCustomerOwnership, generateApiKey } from './auth';
 import { validateIntentInput } from './prompt-injection-detection';
 import { readRequiredSecret } from './secrets';
-import { responseFilterMiddleware, filterInput, getUserRole } from './response-filter';
+import { responseFilterMiddleware, filterInput } from './response-filter';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
