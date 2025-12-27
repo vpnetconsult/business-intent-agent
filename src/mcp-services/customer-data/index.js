@@ -49,7 +49,9 @@ app.post('/mcp/tools/call', (req, res) => {
       credit_score: 'excellent'
     };
 
-    console.log(`[customer-data-mcp] get_customer_profile called for ${params.customer_id}`);
+    // Sanitize customer_id for logging (prevent log injection)
+    const sanitizedCustomerId = String(params.customer_id).replace(/[\r\n]/g, '');
+    console.log(`[customer-data-mcp] get_customer_profile called for ${sanitizedCustomerId}`);
     res.json(profile);
   } else {
     res.status(400).json({ error: 'Unknown tool', tool });

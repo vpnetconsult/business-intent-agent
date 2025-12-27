@@ -79,7 +79,9 @@ app.post('/mcp/tools/call', (req, res) => {
       terms: '24_month_contract'
     };
 
-    console.log(`[bss-oss-mcp] generate_quote called for ${params.customer_id}`);
+    // Sanitize customer_id for logging (prevent log injection)
+    const sanitizedCustomerId = String(params.customer_id).replace(/[\r\n]/g, '');
+    console.log(`[bss-oss-mcp] generate_quote called for ${sanitizedCustomerId}`);
     res.json(quote);
   } else {
     res.status(400).json({ error: 'Unknown tool', tool });

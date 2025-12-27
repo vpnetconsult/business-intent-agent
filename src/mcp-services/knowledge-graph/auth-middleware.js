@@ -187,9 +187,13 @@ function auditLogger(serviceName) {
 
 /**
  * Hash API key for logging (never log raw keys)
+ * Uses HMAC-SHA256 for better security than plain SHA-256
+ * Note: This is for audit logging obfuscation, not authentication
  */
 function hashApiKey(apiKey) {
-  return crypto.createHash('sha256').update(apiKey).digest('hex').substring(0, 16);
+  // Use HMAC for logging hash (not for authentication/verification)
+  const secret = process.env.LOG_HASH_SECRET || 'default-log-secret-change-in-production';
+  return crypto.createHmac('sha256', secret).update(apiKey).digest('hex').substring(0, 16);
 }
 
 /**

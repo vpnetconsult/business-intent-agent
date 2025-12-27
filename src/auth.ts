@@ -38,7 +38,7 @@ if (process.env.NODE_ENV === 'development' && API_KEYS.size === 0) {
     name: 'Development API Key',
     createdAt: new Date(),
   });
-  logger.warn({ apiKey: defaultKey }, 'Using development API key - NOT FOR PRODUCTION');
+  logger.warn({ apiKeyPrefix: defaultKey.substring(0, 8) + '...' }, 'Using development API key - NOT FOR PRODUCTION');
 }
 
 /**

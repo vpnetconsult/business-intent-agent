@@ -238,27 +238,39 @@ function calculateConfidence(severity: string, patternCount: number): number {
  */
 export function sanitizeInput(input: string): string {
   let sanitized = input;
+  let previousLength = 0;
 
-  // Remove HTML tags
-  sanitized = sanitized.replace(/<[^>]*>/g, '');
+  // Iteratively remove dangerous patterns until no more changes occur
+  // This prevents bypass attacks like <scr<script>ipt>
+  while (sanitized.length !== previousLength) {
+    previousLength = sanitized.length;
 
-  // Remove script tags specifically (belt and suspenders)
-  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    // Remove HTML tags (including malformed/nested ones)
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
 
-  // Remove event handlers
-  sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+    // Remove script tags with any attributes or variations
+    sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gis, '');
 
-  // Remove JavaScript protocol
-  sanitized = sanitized.replace(/javascript:/gi, '');
+    // Remove any remaining script-like patterns
+    sanitized = sanitized.replace(/script/gi, '');
+
+    // Remove event handlers (comprehensive patterns)
+    sanitized = sanitized.replace(/on\w+\s*=\s*["']?[^"'\s>]*["']?/gi, '');
+  }
+
+  // Remove JavaScript protocol (after loop to catch encoded versions)
+  sanitized = sanitized.replace(/javascript\s*:/gi, '');
+  sanitized = sanitized.replace(/data\s*:text\/html/gi, '');
+  sanitized = sanitized.replace(/vbscript\s*:/gi, '');
 
   // Remove excessive newlines/spaces
   sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
   sanitized = sanitized.replace(/\s{3,}/g, ' ');
 
-  // Remove control characters (except newline, tab)
-  sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+  // Remove control characters (except newline, tab, carriage return)
+  sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '');
 
-  // Normalize Unicode
+  // Normalize Unicode to prevent homograph attacks
   sanitized = sanitized.normalize('NFKC');
 
   return sanitized.trim();
