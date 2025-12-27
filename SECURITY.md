@@ -104,6 +104,41 @@ Include the following information:
    - Authentication attempt tracking
    - PII masking operation tracking
 
+## Known CVEs and Resolutions
+
+### CVE-2023-45857: Axios SSRF Vulnerability
+
+**Status:** ✅ **RESOLVED** (December 27, 2025)
+
+| Attribute | Details |
+|-----------|---------|
+| **Severity** | Medium (CVSS 5.3) |
+| **Component** | axios |
+| **Vulnerable Versions** | < 1.6.0 |
+| **Fixed In** | 1.6.0+ |
+| **Current Version** | 1.13.2 ✓ |
+| **Impact** | Server-Side Request Forgery through improper redirect handling |
+| **Mitigation** | Updated axios to v1.13.2 with enhanced redirect validation |
+
+**Description:** Axios versions prior to 1.6.0 were vulnerable to SSRF attacks allowing attackers to bypass proxy configurations and access internal services through malicious redirects.
+
+**Resolution:** All instances of axios have been updated to v1.13.2, which includes proper redirect validation, enhanced proxy configuration enforcement, and improved URL parsing security.
+
+**Verification:**
+```bash
+npm list axios
+# business-intent-agent@1.0.0
+# └── axios@1.13.2
+
+npm audit
+# found 0 vulnerabilities
+```
+
+**Related Commits:**
+- `22104ed` - fix: Update dependencies to resolve security vulnerabilities
+
+For detailed security audit results, see [SECURITY_REPORT.md](SECURITY_REPORT.md).
+
 ## Security Best Practices
 
 ### For Operators
@@ -188,9 +223,11 @@ Include the following information:
 
 ### Audits
 
-- **Last Security Assessment:** December 26, 2025 (NIST CSF 2.0)
-- **Next Planned Audit:** March 26, 2026 (Quarterly)
+- **Last Security Assessment:** December 27, 2025 (Dependency & CVE Audit)
+- **Previous Assessment:** December 26, 2025 (NIST CSF 2.0)
+- **Next Planned Audit:** January 27, 2026 (Monthly)
 - **Penetration Test:** Planned for Q1 2026
+- **Detailed Report:** [SECURITY_REPORT.md](SECURITY_REPORT.md)
 
 ## Incident Response
 
@@ -232,6 +269,7 @@ Security researchers who have responsibly disclosed vulnerabilities:
 
 ---
 
-**Last Updated:** December 26, 2025
+**Last Updated:** December 27, 2025
 **Version:** 1.1.0
 **Classification:** PUBLIC
+**Security Report:** [SECURITY_REPORT.md](SECURITY_REPORT.md)
