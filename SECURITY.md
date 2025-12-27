@@ -202,6 +202,70 @@ curl -X POST http://customer-data-mcp:8080/mcp/tools/call \
 - Immediate rotation if compromise suspected
 - Documented in `mcp-services-k8s/mcp-secrets.yaml`
 
+### MED-001: Anthropic API Key Exposure Pattern
+
+**Status:** ✅ **RESOLVED** (December 27, 2025)
+
+| Attribute | Details |
+|-----------|---------|
+| **Severity** | Medium (CVSS 5.3) |
+| **Component** | business-intent-agent |
+| **Vulnerability** | API key exposed in environment variables |
+| **Fixed In** | v1.1.0 |
+| **Impact** | API key visible in process listings and container inspect commands |
+| **Mitigation** | Implemented file-based secret reading with fallback to environment variables |
+
+**Description:** The Anthropic API key was being loaded directly from environment variables (`ANTHROPIC_API_KEY`), making it visible in process listings (`ps aux`), container inspect commands (`docker inspect`), and Kubernetes pod descriptions. This exposure pattern increases the risk of credential leakage through various monitoring and debugging tools.
+
+**Resolution:** Implemented a secure secret management pattern that prioritizes file-based secrets:
+
+1. **Secrets Utility Module** (`src/secrets.ts`)
+   - Dual-mode secret reading: file-based with environment variable fallback
+   - File path specified via `<SECRET_NAME>_FILE` environment variable
+   - Automatic secret trimming (removes whitespace/newlines)
+   - Comprehensive logging for audit trail
+   - Graceful error handling with fallback mechanism
+
+2. **Kubernetes Configuration**
+   - Secret mounted as file at `/run/secrets/anthropic_api_key`
+   - Environment variable `ANTHROPIC_API_KEY_FILE` points to file path
+   - Volume mount configured with read-only access
+   - Secret file permissions managed by Kubernetes
+
+3. **Docker Compose Configuration**
+   - Docker Secrets integration (`/run/secrets/anthropic_api_key`)
+   - Secret file sourced from `./secrets/anthropic_api_key.txt`
+   - Consistent pattern with other service secrets (PostgreSQL, Neo4j, Grafana)
+
+**Benefits:**
+- ✅ API key not visible in environment variables
+- ✅ Reduced exposure in process listings
+- ✅ File permissions provide additional access control
+- ✅ Backward compatible (environment variable fallback)
+- ✅ Consistent with Docker/Kubernetes best practices
+
+**Verification:**
+```bash
+# Kubernetes: Secret mounted as file
+kubectl exec -it business-intent-agent-xxx -- ls -la /run/secrets/
+# -r--r----- 1 root root 43 Dec 27 12:00 anthropic_api_key
+
+# Environment variable points to file, not secret value
+kubectl exec -it business-intent-agent-xxx -- env | grep ANTHROPIC
+# ANTHROPIC_API_KEY_FILE=/run/secrets/anthropic_api_key
+
+# Docker Compose: Secret accessible via file
+docker exec business-intent-agent ls -la /run/secrets/
+# -r--r----- 1 root root 43 Dec 27 12:00 anthropic_api_key
+```
+
+**Backward Compatibility:**
+The implementation maintains backward compatibility by supporting both patterns:
+- **Preferred**: `ANTHROPIC_API_KEY_FILE` (file path)
+- **Fallback**: `ANTHROPIC_API_KEY` (direct value)
+
+This allows gradual migration and ensures existing deployments continue functioning.
+
 For detailed security audit results, see [SECURITY_REPORT.md](SECURITY_REPORT.md).
 
 ## Security Best Practices

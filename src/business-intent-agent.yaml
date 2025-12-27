@@ -22,6 +22,13 @@ spec:
         prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: business-intent-agent
+      volumes:
+      - name: anthropic-api-key
+        secret:
+          secretName: anthropic-api-key
+          items:
+          - key: key
+            path: anthropic_api_key
       containers:
       - name: business-intent-agent
         image: vpnet/business-intent-agent:1.0.0
@@ -31,11 +38,8 @@ spec:
         - configMapRef:
             name: shared-config
         env:
-        - name: ANTHROPIC_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: anthropic-api-key
-              key: key
+        - name: ANTHROPIC_API_KEY_FILE
+          value: "/run/secrets/anthropic_api_key"
         - name: MCP_API_KEY_BUSINESS_INTENT
           valueFrom:
             secretKeyRef:
@@ -47,6 +51,10 @@ spec:
           value: "http://knowledge-graph-mcp-service:8080"
         - name: MCP_CUSTOMER_DATA_URL
           value: "http://customer-data-mcp-service:8080"
+        volumeMounts:
+        - name: anthropic-api-key
+          mountPath: "/run/secrets"
+          readOnly: true
         resources:
           requests:
             cpu: 1000m

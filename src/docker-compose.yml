@@ -18,12 +18,14 @@ services:
       - NODE_ENV=development
       - PORT=8080
       - LOG_LEVEL=info
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_API_KEY_FILE=/run/secrets/anthropic_api_key
       - CLAUDE_MODEL=claude-sonnet-4-20250514
       - MCP_BSS_URL=http://bss-oss-mcp:8080
       - MCP_KNOWLEDGE_GRAPH_URL=http://knowledge-graph-mcp:8080
       - MCP_CUSTOMER_DATA_URL=http://customer-data-mcp:8080
       - REDIS_URL=redis://redis:6379
+    secrets:
+      - anthropic_api_key
     depends_on:
       - redis
     networks:
@@ -126,6 +128,8 @@ volumes:
 
 # Docker secrets - mounted at /run/secrets/<secret_name>
 secrets:
+  anthropic_api_key:
+    file: ./secrets/anthropic_api_key.txt
   postgres_password:
     file: ./secrets/postgres_password.txt
   neo4j_password:

@@ -10,6 +10,7 @@ import { logger } from './logger';
 import { metricsMiddleware, register } from './metrics';
 import { authenticateApiKey, validateCustomerOwnership, generateApiKey } from './auth';
 import { validateIntentInput } from './prompt-injection-detection';
+import { readRequiredSecret } from './secrets';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -39,7 +40,7 @@ app.use(metricsMiddleware);
 
 // Initialize Claude client
 const claude = new ClaudeClient({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: readRequiredSecret('ANTHROPIC_API_KEY', 'ANTHROPIC_API_KEY_FILE'),
   model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514',
   maxTokens: parseInt(process.env.CLAUDE_MAX_TOKENS || '4000'),
   temperature: parseFloat(process.env.CLAUDE_TEMPERATURE || '0.7'),
