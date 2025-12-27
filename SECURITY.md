@@ -448,7 +448,7 @@ For detailed security audit results, see [SECURITY_REPORT.md](SECURITY_REPORT.md
   - Article 5(1)(c): Data minimization
   - Article 32: Security of processing
   - Article 33: Breach notification (72 hours)
-  - Article 35: Data Protection Impact Assessment
+  - Article 35: Data Protection Impact Assessment - [DPIA.md](DPIA.md)
 
 - ✅ **OWASP Top 10**
   - A01:2021 - Broken Access Control
@@ -468,6 +468,7 @@ For detailed security audit results, see [SECURITY_REPORT.md](SECURITY_REPORT.md
 - **Next Planned Audit:** January 27, 2026 (Monthly)
 - **Penetration Test:** Planned for Q1 2026
 - **Detailed Report:** [SECURITY_REPORT.md](SECURITY_REPORT.md)
+- **GDPR DPIA:** [DPIA.md](DPIA.md)
 
 ## Incident Response
 
@@ -513,3 +514,4 @@ Security researchers who have responsibly disclosed vulnerabilities:
 **Version:** 1.1.0
 **Classification:** PUBLIC
 **Security Report:** [SECURITY_REPORT.md](SECURITY_REPORT.md)
+**GDPR DPIA:** [DPIA.md](DPIA.md)
