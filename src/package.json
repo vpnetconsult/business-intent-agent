@@ -6,12 +6,12 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node-dev --respawn src/index.ts",
+    "dev": "ts-node-dev --respawn index.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src/**/*.ts",
-    "format": "prettier --write src/**/*.ts",
+    "lint": "eslint '*.ts' --ignore-pattern 'dist/**' --ignore-pattern '**/*.test.ts'",
+    "format": "prettier --write '*.ts' '!dist/**' '!**/*.test.ts'",
     "audit": "npm audit --audit-level=moderate",
     "audit:fix": "npm audit fix",
     "security:check": "npm audit && npm run lint"

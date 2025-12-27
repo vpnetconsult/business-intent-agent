@@ -13,7 +13,7 @@ export class IntentProcessor {
     }
   ) {}
 
-  async process(customerId: string, intent: string, context?: any): Promise<any> {
+  async process(customerId: string, intent: string, _context?: any): Promise<any> {
     const startTime = Date.now();
 
     try {

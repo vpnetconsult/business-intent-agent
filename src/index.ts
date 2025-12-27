@@ -186,7 +186,7 @@ app.post('/api/v1/intent', authenticateApiKey, validateCustomerOwnership, async 
 });
 
 // Error handling middleware
-app.use((err: Error, req: Request, res: Response, next: any) => {
+app.use((err: Error, req: Request, res: Response, _next: any) => {
   logger.error({ err }, 'Unhandled error');
   res.status(500).json({
     error: 'Internal server error',

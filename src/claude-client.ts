@@ -1,5 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { logger } from './logger';
 
 export interface ClaudeConfig {
   apiKey: string;
