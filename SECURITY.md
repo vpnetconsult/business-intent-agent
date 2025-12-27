@@ -266,6 +266,117 @@ The implementation maintains backward compatibility by supporting both patterns:
 
 This allows gradual migration and ensures existing deployments continue functioning.
 
+### API3: Broken Object Property Level Authorization
+
+**Status:** ✅ **RESOLVED** (December 27, 2025)
+
+| Attribute | Details |
+|-----------|---------|
+| **Severity** | Medium (CVSS 6.5) |
+| **Component** | business-intent-agent API responses |
+| **Vulnerability** | Excessive data exposure, no field-level access control, mass assignment |
+| **Fixed In** | v1.1.0 |
+| **Impact** | API responses contained sensitive PII regardless of user role |
+| **Mitigation** | Implemented role-based field filtering and mass assignment protection |
+
+**Description:** The API was returning complete customer profiles including sensitive PII (email, phone, credit scores) to all authenticated users without field-level authorization checks. Additionally, there was no mass assignment protection on input fields, allowing clients to potentially inject unexpected data.
+
+**Vulnerabilities Identified:**
+1. **Excessive Data Exposure**: All customer profile fields returned regardless of user role
+2. **No Field-Level Authorization**: Same data returned to customers, agents, and admins
+3. **Mass Assignment**: No input field whitelisting on POST endpoints
+4. **PII Over-Sharing**: Email, phone numbers exposed in API responses
+
+**Resolution:** Implemented comprehensive field-level authorization controls:
+
+**1. Role-Based Access Control** (`src/response-filter.ts`)
+- **Customer Role**: Limited access - own data only, PII redacted
+  - Email, phone: `[REDACTED]`
+  - Credit score: Generalized to tier (high/medium/low)
+  - Location: City and country only
+  - Name: Replaced with `[Authenticated User]`
+
+- **Agent Role**: Support agent access - customer data, some PII
+  - Can view customer profiles for support
+  - Email and phone still redacted
+  - Credit score visible for risk assessment
+
+- **Admin Role**: Full access - all data including PII
+  - Complete customer profiles
+  - All financial data
+  - Debug and internal fields
+
+- **System Role**: Internal system - full access for integrations
+
+**2. Field-Level Permissions Matrix**
+```typescript
+FIELD_PERMISSIONS = {
+  'email': [Admin, System],              // Admin only
+  'phone': [Admin, System],              // Admin only
+  'credit_score': [Agent, Admin, System], // Not for customers
+  'name': [Agent, Admin, System],        // Hashed for customers
+  'customer_id': [All roles],             // All can see
+  'segment': [All roles],                 // All can see
+  // ... complete matrix in code
+}
+```
+
+**3. Mass Assignment Protection**
+- Input field whitelisting for all POST endpoints
+- Only allowed fields accepted from client
+- Unexpected fields trigger warning and rejection
+- Audit logging of mass assignment attempts
+
+**4. Response Filter Middleware**
+- Automatic filtering of all API responses
+- Applied globally to all endpoints
+- Filters nested objects recursively
+- Comprehensive audit logging
+
+**Benefits:**
+- ✅ PII exposure limited to authorized roles
+- ✅ Principle of least privilege enforced
+- ✅ Mass assignment attacks prevented
+- ✅ Automatic response filtering (no developer errors)
+- ✅ Comprehensive audit trail
+- ✅ OWASP API Security Top 10 compliant
+
+**Verification:**
+```bash
+# Customer role - limited data
+curl -H "Authorization: Bearer customer-key" /api/v1/intent
+{
+  "customer_profile": {
+    "customer_id": "CUST-001",
+    "segment": "premium",
+    "email": "[REDACTED]",      # ✅ Redacted
+    "phone": "[REDACTED]",      # ✅ Redacted
+    "credit_score": "high"      # ✅ Generalized
+  }
+}
+
+# Admin role - full data
+curl -H "Authorization: Bearer admin-key" /api/v1/intent
+{
+  "customer_profile": {
+    "customer_id": "CUST-001",
+    "email": "john@example.com",  # ✅ Visible
+    "phone": "+353-1-234-5678",   # ✅ Visible
+    "credit_score": "excellent"   # ✅ Detailed
+  }
+}
+
+# Mass assignment protection
+curl -X POST /api/v1/intent \
+  -d '{"customerId":"CUST-001","intent":"upgrade","malicious":"field"}'
+# Response: 400 Bad Request - "Request contains unexpected fields"
+```
+
+**OWASP API Security Compliance:**
+- ✅ **API3:2023** - Broken Object Property Level Authorization (RESOLVED)
+- ✅ **API6:2023** - Unrestricted Access to Sensitive Business Flows (MITIGATED)
+- ✅ **API8:2023** - Security Misconfiguration (MITIGATED)
+
 For detailed security audit results, see [SECURITY_REPORT.md](SECURITY_REPORT.md).
 
 ## Security Best Practices

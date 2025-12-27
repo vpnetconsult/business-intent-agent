@@ -11,6 +11,7 @@ import { metricsMiddleware, register } from './metrics';
 import { authenticateApiKey, validateCustomerOwnership, generateApiKey } from './auth';
 import { validateIntentInput } from './prompt-injection-detection';
 import { readRequiredSecret } from './secrets';
+import { responseFilterMiddleware, filterInput, getUserRole } from './response-filter';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -37,6 +38,9 @@ app.use('/api/', limiter);
 
 // Metrics middleware
 app.use(metricsMiddleware);
+
+// Response filtering middleware (role-based field-level authorization)
+app.use(responseFilterMiddleware);
 
 // Initialize Claude client
 const claude = new ClaudeClient({
@@ -107,7 +111,19 @@ app.post('/api/v1/admin/generate-api-key', (req: Request, res: Response) => {
     });
   }
 
-  const { customerId, name } = req.body;
+  // Mass assignment protection
+  const { filtered, violations } = filterInput(req.body, 'generate_api_key');
+
+  if (violations.length > 0) {
+    logger.warn({ violations }, 'Mass assignment protection triggered on admin endpoint');
+    return res.status(400).json({
+      error: 'Invalid request',
+      message: 'Request contains unexpected fields',
+      violations,
+    });
+  }
+
+  const { customerId, name } = filtered;
 
   if (!customerId || !name) {
     return res.status(400).json({
@@ -134,7 +150,19 @@ app.post('/api/v1/intent', authenticateApiKey, validateCustomerOwnership, async 
   const startTime = Date.now();
 
   try {
-    const { customerId, intent, context } = req.body;
+    // Mass assignment protection - only allow whitelisted fields
+    const { filtered, violations } = filterInput(req.body, 'intent');
+
+    if (violations.length > 0) {
+      logger.warn({ violations }, 'Mass assignment protection triggered');
+      return res.status(400).json({
+        error: 'Invalid request',
+        message: 'Request contains unexpected fields',
+        violations,
+      });
+    }
+
+    const { customerId, intent, context } = filtered;
 
     if (!customerId || !intent) {
       return res.status(400).json({

@@ -85,8 +85,7 @@ export class IntentProcessor {
 
       return {
         intent_analysis: intentAnalysis,
-        customer_profile: customerProfile, // Return original profile to authenticated client
-        customer_profile_masked: maskedProfile, // Also return masked version for transparency
+        customer_profile: customerProfile, // Will be filtered by response-filter middleware based on role
         recommended_offer: offer,
         quote: quote,
         processing_time_ms: processingTime,
