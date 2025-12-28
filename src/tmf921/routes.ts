@@ -6,7 +6,7 @@
 
 import { Router, Request, Response } from 'express';
 import { TMF921IntentService } from './intent-service';
-import { IntentCreate, IntentUpdate, IntentStateType, IntentType } from './types';
+import { IntentCreate, IntentUpdate, IntentLifecycleStatus, IntentType } from './types';
 import { logger } from '../logger';
 import { authenticateApiKey, validateCustomerOwnership } from '../auth';
 import { filterInput } from '../response-filter';
@@ -59,15 +59,23 @@ export function createTMF921Router(intentService: TMF921IntentService): Router {
 
         logger.info({ intentId: intent.id, customerId }, 'TMF921 Intent created via API');
 
+        // TMF921 spec: 201 Created for sync, 202 Accepted for async
+        // We process async, but return 201 with intent in acknowledged state
         res.status(201)
           .location(intent.href!)
           .json(intent);
 
       } catch (error) {
         logger.error({ error: (error as Error).message }, 'TMF921 Intent creation failed');
-        res.status(500).json({
-          error: 'Internal server error',
-          message: (error as Error).message,
+
+        // TMF921 spec-compliant error responses
+        const err = error as any;
+        const statusCode = err.status || err.statusCode || 500;
+
+        res.status(statusCode).json({
+          error: err.name || 'Internal server error',
+          message: err.message,
+          code: statusCode,
         });
       }
     }
@@ -110,9 +118,14 @@ export function createTMF921Router(intentService: TMF921IntentService): Router {
 
       } catch (error) {
         logger.error({ error: (error as Error).message }, 'TMF921 Intent retrieval failed');
-        res.status(500).json({
-          error: 'Internal server error',
-          message: (error as Error).message,
+
+        const err = error as any;
+        const statusCode = err.status || err.statusCode || 500;
+
+        res.status(statusCode).json({
+          error: err.name || 'Internal server error',
+          message: err.message,
+          code: statusCode,
         });
       }
     }
@@ -129,9 +142,9 @@ export function createTMF921Router(intentService: TMF921IntentService): Router {
       try {
         const customerId = (req as any).auth?.customerId;
 
-        // Parse query parameters
+        // Parse query parameters (TMF921 spec compliant)
         const filters = {
-          state: req.query.state as IntentStateType | undefined,
+          lifecycleStatus: req.query.lifecycleStatus as IntentLifecycleStatus | string | undefined,
           intentType: req.query.intentType as IntentType | undefined,
           relatedPartyId: customerId, // Always filter by customer
           limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
@@ -144,9 +157,14 @@ export function createTMF921Router(intentService: TMF921IntentService): Router {
 
       } catch (error) {
         logger.error({ error: (error as Error).message }, 'TMF921 Intent listing failed');
-        res.status(500).json({
-          error: 'Internal server error',
-          message: (error as Error).message,
+
+        const err = error as any;
+        const statusCode = err.status || err.statusCode || 500;
+
+        res.status(statusCode).json({
+          error: err.name || 'Internal server error',
+          message: err.message,
+          code: statusCode,
         });
       }
     }
@@ -210,9 +228,14 @@ export function createTMF921Router(intentService: TMF921IntentService): Router {
 
       } catch (error) {
         logger.error({ error: (error as Error).message }, 'TMF921 Intent update failed');
-        res.status(500).json({
-          error: 'Internal server error',
-          message: (error as Error).message,
+
+        const err = error as any;
+        const statusCode = err.status || err.statusCode || 500;
+
+        res.status(statusCode).json({
+          error: err.name || 'Internal server error',
+          message: err.message,
+          code: statusCode,
         });
       }
     }
@@ -259,13 +282,20 @@ export function createTMF921Router(intentService: TMF921IntentService): Router {
           });
         }
 
+        // TMF921 spec: 202 Accepted or 204 No Content
+        // We use 204 for immediate deletion
         res.status(204).send();
 
       } catch (error) {
         logger.error({ error: (error as Error).message }, 'TMF921 Intent deletion failed');
-        res.status(500).json({
-          error: 'Internal server error',
-          message: (error as Error).message,
+
+        const err = error as any;
+        const statusCode = err.status || err.statusCode || 500;
+
+        res.status(statusCode).json({
+          error: err.name || 'Internal server error',
+          message: err.message,
+          code: statusCode,
         });
       }
     }

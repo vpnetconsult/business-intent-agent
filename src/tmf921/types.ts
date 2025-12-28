@@ -7,15 +7,53 @@
  */
 
 /**
- * Intent Lifecycle States
+ * Intent Lifecycle States (TMF921 uses lifecycleStatus)
  */
-export enum IntentStateType {
+export enum IntentLifecycleStatus {
   ACKNOWLEDGED = 'acknowledged',
   IN_PROGRESS = 'inProgress',
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
-  PENDING = 'pending'
+  PENDING = 'pending',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive'
+}
+
+/**
+ * Time Period
+ */
+export interface TimePeriod {
+  startDateTime?: string;
+  endDateTime?: string;
+}
+
+/**
+ * Characteristic (generic key-value metadata)
+ */
+export interface Characteristic {
+  name: string;
+  value: any;
+  valueType?: string;
+  '@type'?: string;
+}
+
+/**
+ * Intent Expression (for semantic intent definitions)
+ */
+export interface IntentExpression {
+  iri?: string;  // Internationalized Resource Identifier
+  '@type'?: string;
+}
+
+/**
+ * Entity Relationship (for linking related intents)
+ */
+export interface EntityRelationship {
+  id?: string;
+  href?: string;
+  relationshipType?: string;
+  '@type'?: string;
 }
 
 /**
@@ -86,22 +124,50 @@ export interface IntentReport {
 }
 
 /**
- * Main Intent Resource (TMF921)
+ * Main Intent Resource (TMF921) - Full Spec Compliant
  */
 export interface Intent {
+  // Core identifiers
   id?: string;
   href?: string;
   name: string;
   description?: string;
+
+  // Classification and priority
   intentType?: IntentType;
-  priority?: number;
-  state?: IntentStateType;
+  priority?: number | string;  // Spec allows string for named priorities
+
+  // Lifecycle (TMF921 uses lifecycleStatus instead of state)
+  lifecycleStatus?: IntentLifecycleStatus | string;
+  statusChangeDate?: string;  // When status last changed
+
+  // Temporal
   creationDate?: string;
-  lastModifiedDate?: string;
+  lastUpdate?: string;  // TMF921 uses lastUpdate, not lastModifiedDate
+  validFor?: TimePeriod;  // Validity period for the intent
+
+  // Versioning and context
+  version?: string;
+  context?: string;
+  isBundle?: boolean;  // Whether this is a bundle of intents
+
+  // Expectations and specifications
   intentExpectation?: IntentExpectation[];
-  intentReport?: IntentReport[];
-  relatedParty?: RelatedEntity[];
   intentSpecification?: RelatedEntity;
+  expression?: IntentExpression;  // Semantic intent expression (JSON-LD, Turtle)
+
+  // Metadata and attachments
+  characteristic?: Characteristic[];  // Generic key-value metadata
+  attachment?: RelatedEntity[];  // Documents, media, etc.
+
+  // Relationships
+  intentRelationship?: EntityRelationship[];  // Related intents
+  relatedParty?: RelatedEntity[];
+
+  // Reporting
+  intentReport?: IntentReport[];
+
+  // Polymorphism
   '@type'?: string;
   '@baseType'?: string;
   '@schemaLocation'?: string;
@@ -114,10 +180,18 @@ export interface IntentCreate {
   name: string;
   description?: string;
   intentType?: IntentType;
-  priority?: number;
+  priority?: number | string;
+  validFor?: TimePeriod;
+  context?: string;
+  version?: string;
+  isBundle?: boolean;
   intentExpectation?: IntentExpectation[];
-  relatedParty?: RelatedEntity[];
   intentSpecification?: RelatedEntity;
+  expression?: IntentExpression;
+  characteristic?: Characteristic[];
+  attachment?: RelatedEntity[];
+  intentRelationship?: EntityRelationship[];
+  relatedParty?: RelatedEntity[];
   '@type'?: string;
   '@baseType'?: string;
   '@schemaLocation'?: string;
@@ -129,9 +203,14 @@ export interface IntentCreate {
 export interface IntentUpdate {
   name?: string;
   description?: string;
-  priority?: number;
-  state?: IntentStateType;
+  priority?: number | string;
+  lifecycleStatus?: IntentLifecycleStatus | string;
+  validFor?: TimePeriod;
+  context?: string;
+  version?: string;
   intentExpectation?: IntentExpectation[];
+  characteristic?: Characteristic[];
+  expression?: IntentExpression;
   '@type'?: string;
 }
 

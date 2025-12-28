@@ -5,7 +5,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Intent, IntentCreate, IntentUpdate, IntentStateType, IntentType, IntentReport, IntentReportEntry } from './types';
+import { Intent, IntentCreate, IntentUpdate, IntentLifecycleStatus, IntentType, IntentReport, IntentReportEntry } from './types';
 import { IntentProcessor } from '../intent-processor';
 import { logger } from '../logger';
 
@@ -25,14 +25,14 @@ class IntentStore {
   }
 
   findAll(filters?: {
-    state?: IntentStateType;
+    lifecycleStatus?: IntentLifecycleStatus | string;
     intentType?: IntentType;
     relatedPartyId?: string;
   }): Intent[] {
     let results = Array.from(this.intents.values());
 
-    if (filters?.state) {
-      results = results.filter(i => i.state === filters.state);
+    if (filters?.lifecycleStatus) {
+      results = results.filter(i => i.lifecycleStatus === filters.lifecycleStatus);
     }
 
     if (filters?.intentType) {
@@ -56,10 +56,16 @@ class IntentStore {
     const intent = this.intents.get(id);
     if (!intent) return undefined;
 
+    const now = new Date().toISOString();
+
+    // Track status changes
+    const statusChanged = updates.lifecycleStatus && updates.lifecycleStatus !== intent.lifecycleStatus;
+
     const updated = {
       ...intent,
       ...updates,
-      lastModifiedDate: new Date().toISOString(),
+      lastUpdate: now,
+      statusChangeDate: statusChanged ? now : intent.statusChangeDate,
     };
 
     this.intents.set(id, updated);
@@ -84,16 +90,41 @@ export class TMF921IntentService {
     const intentId = uuidv4();
 
     const intent: Intent = {
+      // Core identifiers
       id: intentId,
       href: `/tmf-api/intentManagement/v5/intent/${intentId}`,
       name: intentCreate.name,
       description: intentCreate.description,
+
+      // Classification
       intentType: intentCreate.intentType || IntentType.CUSTOMER_INTENT,
       priority: intentCreate.priority || 5,
-      state: IntentStateType.ACKNOWLEDGED,
+
+      // Lifecycle (TMF921 spec compliant)
+      lifecycleStatus: IntentLifecycleStatus.ACKNOWLEDGED,
+      statusChangeDate: now,
+
+      // Temporal
       creationDate: now,
-      lastModifiedDate: now,
+      lastUpdate: now,
+      validFor: intentCreate.validFor,
+
+      // Versioning and context
+      version: intentCreate.version || '1.0',
+      context: intentCreate.context,
+      isBundle: intentCreate.isBundle || false,
+
+      // Expectations and specifications
       intentExpectation: intentCreate.intentExpectation || [],
+      intentSpecification: intentCreate.intentSpecification,
+      expression: intentCreate.expression,
+
+      // Metadata
+      characteristic: intentCreate.characteristic || [],
+      attachment: intentCreate.attachment || [],
+
+      // Relationships
+      intentRelationship: intentCreate.intentRelationship || [],
       relatedParty: intentCreate.relatedParty || [
         {
           id: customerId,
@@ -101,8 +132,11 @@ export class TMF921IntentService {
           '@referredType': 'Individual'
         }
       ],
-      intentSpecification: intentCreate.intentSpecification,
+
+      // Reporting
       intentReport: [],
+
+      // Polymorphism
       '@type': intentCreate['@type'] || 'Intent',
       '@baseType': intentCreate['@baseType'],
       '@schemaLocation': intentCreate['@schemaLocation']
@@ -132,14 +166,14 @@ export class TMF921IntentService {
    * List Intents with optional filters (GET /tmf-api/intentManagement/v5/intent)
    */
   async listIntents(filters?: {
-    state?: IntentStateType;
+    lifecycleStatus?: IntentLifecycleStatus | string;
     intentType?: IntentType;
     relatedPartyId?: string;
     limit?: number;
     offset?: number;
   }): Promise<Intent[]> {
     let results = this.store.findAll({
-      state: filters?.state,
+      lifecycleStatus: filters?.lifecycleStatus,
       intentType: filters?.intentType,
       relatedPartyId: filters?.relatedPartyId,
     });
@@ -172,8 +206,8 @@ export class TMF921IntentService {
     const intent = this.store.findById(id);
 
     if (intent) {
-      // Mark as cancelled before deletion
-      this.store.update(id, { state: IntentStateType.CANCELLED });
+      // Mark as cancelled before deletion (TMF921 spec compliant)
+      this.store.update(id, { lifecycleStatus: IntentLifecycleStatus.CANCELLED });
       logger.info({ intentId: id }, 'TMF921 Intent cancelled');
     }
 
@@ -220,8 +254,8 @@ export class TMF921IntentService {
    */
   private async processIntentAsync(intent: Intent, customerId: string): Promise<void> {
     try {
-      // Update state to in progress
-      this.store.update(intent.id!, { state: IntentStateType.IN_PROGRESS });
+      // Update lifecycleStatus to in progress (TMF921 spec compliant)
+      this.store.update(intent.id!, { lifecycleStatus: IntentLifecycleStatus.IN_PROGRESS });
       await this.addIntentReport(intent.id!, 'processing', 'Intent processing started');
 
       // Extract intent text from intentExpectation
@@ -232,8 +266,8 @@ export class TMF921IntentService {
         tmf921Intent: intent
       });
 
-      // Update state to completed
-      this.store.update(intent.id!, { state: IntentStateType.COMPLETED });
+      // Update lifecycleStatus to completed
+      this.store.update(intent.id!, { lifecycleStatus: IntentLifecycleStatus.COMPLETED });
       await this.addIntentReport(intent.id!, 'completed', JSON.stringify({
         offer: result.recommended_offer?.name,
         products: result.recommended_offer?.selected_products,
@@ -243,8 +277,8 @@ export class TMF921IntentService {
       logger.info({ intentId: intent.id, customerId }, 'TMF921 Intent processing completed');
 
     } catch (error) {
-      // Update state to failed
-      this.store.update(intent.id!, { state: IntentStateType.FAILED });
+      // Update lifecycleStatus to failed
+      this.store.update(intent.id!, { lifecycleStatus: IntentLifecycleStatus.FAILED });
       await this.addIntentReport(intent.id!, 'failed', (error as Error).message);
 
       logger.error({ intentId: intent.id, error: (error as Error).message }, 'TMF921 Intent processing failed');

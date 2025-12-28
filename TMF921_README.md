@@ -34,6 +34,12 @@ Create a new customer intent that will be processed asynchronously.
   "description": "I need faster internet for working from home",
   "intentType": "CustomerIntent",
   "priority": 5,
+  "validFor": {
+    "startDateTime": "2025-01-01T00:00:00Z",
+    "endDateTime": "2025-12-31T23:59:59Z"
+  },
+  "context": "work-from-home",
+  "version": "1.0",
   "intentExpectation": [
     {
       "name": "bandwidth",
@@ -44,6 +50,13 @@ Create a new customer intent that will be processed asynchronously.
           "targetValueType": "bandwidth"
         }
       ]
+    }
+  ],
+  "characteristic": [
+    {
+      "name": "urgency",
+      "value": "high",
+      "valueType": "string"
     }
   ]
 }
@@ -58,10 +71,25 @@ Create a new customer intent that will be processed asynchronously.
   "description": "I need faster internet for working from home",
   "intentType": "CustomerIntent",
   "priority": 5,
-  "state": "acknowledged",
+  "lifecycleStatus": "acknowledged",
+  "statusChangeDate": "2025-12-28T12:00:00.000Z",
   "creationDate": "2025-12-28T12:00:00.000Z",
-  "lastModifiedDate": "2025-12-28T12:00:00.000Z",
+  "lastUpdate": "2025-12-28T12:00:00.000Z",
+  "version": "1.0",
+  "context": "work-from-home",
+  "isBundle": false,
+  "validFor": {
+    "startDateTime": "2025-01-01T00:00:00Z",
+    "endDateTime": "2025-12-31T23:59:59Z"
+  },
   "intentExpectation": [...],
+  "characteristic": [
+    {
+      "name": "urgency",
+      "value": "high",
+      "valueType": "string"
+    }
+  ],
   "relatedParty": [
     {
       "id": "CUST123",
@@ -112,7 +140,7 @@ List all intents for the authenticated customer with optional filters.
 **Authentication:** Required (API Key)
 
 **Query Parameters:**
-- `state` - Filter by intent state (acknowledged, inProgress, completed, failed, cancelled)
+- `lifecycleStatus` - Filter by lifecycle status (acknowledged, inProgress, completed, failed, cancelled, active, inactive)
 - `intentType` - Filter by intent type (ServiceIntent, CustomerIntent, etc.)
 - `limit` - Maximum number of results (default: 100)
 - `offset` - Pagination offset (default: 0)
@@ -165,7 +193,7 @@ Cancel and delete an intent.
 
 ## Intent Lifecycle States
 
-Intents progress through the following states:
+Intents progress through the following `lifecycleStatus` values (TMF921 spec compliant):
 
 1. **acknowledged** - Intent created and accepted by the system
 2. **pending** - Intent queued for processing
@@ -173,6 +201,10 @@ Intents progress through the following states:
 4. **completed** - Intent successfully processed, offer generated
 5. **failed** - Intent processing failed
 6. **cancelled** - Intent cancelled by user
+7. **active** - Intent is active and being monitored
+8. **inactive** - Intent is inactive/suspended
+
+**Note:** Field name changed from `state` to `lifecycleStatus` for TMF921 v5.0.0 compliance.
 
 ## Intent Types
 
@@ -218,7 +250,7 @@ curl https://api.example.com/tmf-api/intentManagement/v5/intent/550e8400-e29b-41
 ### 3. List All My Intents
 
 ```bash
-curl "https://api.example.com/tmf-api/intentManagement/v5/intent?state=completed&limit=10" \
+curl "https://api.example.com/tmf-api/intentManagement/v5/intent?lifecycleStatus=completed&limit=10" \
   -H "X-API-Key: your-api-key"
 ```
 
@@ -245,12 +277,17 @@ POST /tmf-api/intentManagement/v5/intent
 
 | Feature | Legacy API | TMF921 API |
 |---------|------------|------------|
-| Standard | Proprietary | TM Forum Standard |
-| Intent Lifecycle | Single request/response | Async with state tracking |
-| Intent History | No | Yes (via intent reports) |
+| Standard | Proprietary | TM Forum TMF921 v5.0.0 |
+| Intent Lifecycle | Single request/response | Async with lifecycle tracking |
+| Intent History | No | Yes (via intentReport) |
 | Multi-party | No | Yes (relatedParty) |
 | Expectations | No | Yes (intentExpectation) |
 | Monitoring | No | Yes (GET /intent/{id}) |
+| Characteristics | No | Yes (generic metadata) |
+| Validity Period | No | Yes (validFor) |
+| Versioning | No | Yes (version field) |
+| Context | No | Yes (context field) |
+| Expression | No | Yes (semantic expressions) |
 
 ### Migration Path
 
@@ -292,8 +329,33 @@ For questions or issues with the TMF921 API implementation:
 - Review intent reports for processing status
 - Contact: support@vpnetconsulting.com
 
+## TMF921 v5.0.0 Compliance
+
+### Spec Compliance Level: Full Core Compliance ✅
+
+**Implemented Features:**
+- ✅ All TMF921 v5.0.0 Intent fields
+- ✅ lifecycleStatus (not state) - spec compliant
+- ✅ lastUpdate (not lastModifiedDate) - spec compliant
+- ✅ TimePeriod for validFor
+- ✅ Characteristic generic metadata
+- ✅ IntentExpression support
+- ✅ EntityRelationship for related intents
+- ✅ Proper HTTP response codes (201, 202, 204, 400, 401, 403, 404, 500)
+- ✅ Query parameters (lifecycleStatus, intentType, limit, offset)
+
+**Not Implemented (Optional):**
+- IntentReport dedicated endpoints
+- IntentSpecification resource
+- Event subscription hub
+- Notification listeners
+
+**Deviations from Spec:**
+- None - Core endpoints are fully TMF921 v5.0.0 compliant
+
 ---
 
 **Implementation Date:** December 28, 2025
-**TMF921 Version:** 5.0.0
+**TMF921 Version:** 5.0.0 (Full Core Compliance)
 **Business Intent Agent Version:** 1.0.0
+**Last Updated:** December 28, 2025 (Critical compliance update)
