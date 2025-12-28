@@ -11,7 +11,8 @@ COPY tsconfig.json ./
 RUN npm ci --only=production && \
     npm ci --only=development
 
-COPY src/ ./src/
+# Copy entire source directory structure (including tmf921/, mcp-services/, etc.)
+COPY . ./
 
 RUN npm run build
 
