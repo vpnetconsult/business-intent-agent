@@ -185,6 +185,29 @@ const ALLOWED_INPUT_FIELDS: Record<string, string[]> = {
 
   // API key generation (admin only)
   generate_api_key: ['customerId', 'name'],
+
+  // TMF921 Intent Management API
+  tmf921_intent_create: [
+    'name',
+    'description',
+    'intentType',
+    'priority',
+    'intentExpectation',
+    'relatedParty',
+    'intentSpecification',
+    '@type',
+    '@baseType',
+    '@schemaLocation'
+  ],
+
+  tmf921_intent_update: [
+    'name',
+    'description',
+    'priority',
+    'state',
+    'intentExpectation',
+    '@type'
+  ],
 };
 
 /**
