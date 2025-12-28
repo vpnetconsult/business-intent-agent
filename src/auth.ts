@@ -113,7 +113,6 @@ export function authenticateApiKey(req: Request, res: Response, next: NextFuncti
 
   logger.info({
     customerId: keyInfo.customerId,
-    apiKeyName: keyInfo.name,
     path: req.path,
     duration: Date.now() - startTime,
   }, 'Authentication successful');
