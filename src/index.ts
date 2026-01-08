@@ -6,6 +6,8 @@ import rateLimit from 'express-rate-limit';
 import { ClaudeClient } from './claude-client';
 import { MCPClient } from './mcp-client';
 import { IntentProcessor } from './intent-processor';
+import { TMF921IntentService } from './tmf921/intent-service';
+import { createTMF921Router } from './tmf921/routes';
 import { logger } from './logger';
 import { metricsMiddleware, register } from './metrics';
 import { authenticateApiKey, validateCustomerOwnership, generateApiKey } from './auth';
@@ -59,6 +61,15 @@ const mcpClients = {
 
 // Initialize intent processor
 const intentProcessor = new IntentProcessor(claude, mcpClients);
+
+// Initialize TMF921 Intent Management Service
+const tmf921IntentService = new TMF921IntentService(intentProcessor);
+const tmf921Router = createTMF921Router(tmf921IntentService);
+
+// Mount TMF921 API routes
+app.use('/tmf-api/intentManagement/v5', tmf921Router);
+
+logger.info('TMF921 Intent Management API mounted at /tmf-api/intentManagement/v5');
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
