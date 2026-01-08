@@ -5,7 +5,7 @@ metadata:
   namespace: intent-platform
   labels:
     app: business-intent-agent
-    version: v1.0.0
+    version: v1.1.0-tmf921
 spec:
   replicas: 3
   selector:
@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: business-intent-agent
-        version: v1.0.0
+        version: v1.1.0-tmf921
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
@@ -31,7 +31,7 @@ spec:
             path: anthropic_api_key
       containers:
       - name: business-intent-agent
-        image: vpnet/business-intent-agent:1.0.0
+        image: vpnet/business-intent-agent:1.1.0-tmf921
         ports:
         - containerPort: 8080
         envFrom:
