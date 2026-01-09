@@ -5,7 +5,7 @@ metadata:
   namespace: intent-platform
   labels:
     app: business-intent-agent
-    version: v1.0.0
+    version: v1.3.0
     component: ai-agent
 spec:
   replicas: 2
@@ -21,7 +21,7 @@ spec:
     metadata:
       labels:
         app: business-intent-agent
-        version: v1.0.0
+        version: v1.3.0
         component: ai-agent
       annotations:
         prometheus.io/scrape: "true"
@@ -43,7 +43,7 @@ spec:
         # 1. Local build: docker build -t business-intent-agent:1.0.0 .
         # 2. Docker Hub: yourusername/business-intent-agent:1.0.0
         # 3. Local registry: localhost:5000/business-intent-agent:1.0.0
-        image: vpnet/business-intent-agent:1.0.0
+        image: business-intent-agent:v1.3.0-tmf921-filters
         imagePullPolicy: IfNotPresent
 
         ports:
