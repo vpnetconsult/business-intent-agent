@@ -49,3 +49,6 @@ src/secrets/*.txt
 
 # Neo4j data
 neo4j-data/
+
+# Serena tool files
+.serena/
