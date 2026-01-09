@@ -1,0 +1,18 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: intent-platform-mtls
+  namespace: intent-platform
+  labels:
+    managed-by: istio
+spec:
+  mtls:
+    mode: STRICT  # Enforce mTLS for all service-to-service communication
+---
+# Note: For gradual rollout, start with PERMISSIVE mode:
+# spec:
+#   mtls:
+#     mode: PERMISSIVE  # Allows both mTLS and plain text
+#
+# After verifying all services work with sidecars, switch to STRICT:
+# kubectl apply -f 09-peerauthentication.yaml

@@ -1,0 +1,57 @@
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: anthropic-api
+  namespace: intent-platform
+  labels:
+    managed-by: istio
+spec:
+  hosts:
+  - api.anthropic.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: anthropic-api-vs
+  namespace: intent-platform
+  labels:
+    managed-by: istio
+spec:
+  hosts:
+  - api.anthropic.com
+  http:
+  - timeout: 120s  # Claude API can take time for complex requests
+    retries:
+      attempts: 2
+      perTryTimeout: 60s
+      retryOn: 5xx,reset,connect-failure
+    route:
+    - destination:
+        host: api.anthropic.com
+        port:
+          number: 443
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: anthropic-api-dr
+  namespace: intent-platform
+  labels:
+    managed-by: istio
+spec:
+  host: api.anthropic.com
+  trafficPolicy:
+    tls:
+      mode: SIMPLE  # TLS for external HTTPS
+    connectionPool:
+      tcp:
+        maxConnections: 10
+        connectTimeout: 10s
+      http:
+        http2MaxRequests: 10

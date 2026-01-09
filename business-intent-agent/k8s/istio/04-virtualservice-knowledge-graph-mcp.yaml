@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: knowledge-graph-mcp-vs
+  namespace: intent-platform
+  labels:
+    app: knowledge-graph-mcp
+    managed-by: istio
+spec:
+  hosts:
+  - knowledge-graph-mcp-service.intent-platform.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: knowledge-graph-mcp-service.intent-platform.svc.cluster.local
+        port:
+          number: 8080
+    timeout: 10s  # Matches MCP_TIMEOUT_MS application configuration
+    retries:
+      attempts: 3  # Matches MCP_RETRY_ATTEMPTS application configuration
+      perTryTimeout: 3s
+      retryOn: 5xx,reset,connect-failure,refused-stream
