@@ -7,7 +7,7 @@ metadata:
     app: business-intent-agent
     version: v1.1.0-tmf921
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: business-intent-agent
@@ -22,6 +22,11 @@ spec:
         prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: business-intent-agent
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001
+        runAsNonRoot: true
       volumes:
       - name: anthropic-api-key
         secret:
@@ -38,6 +43,8 @@ spec:
         - configMapRef:
             name: shared-config
         env:
+        - name: NODE_ENV
+          value: "development"
         - name: ANTHROPIC_API_KEY_FILE
           value: "/run/secrets/anthropic_api_key"
         - name: MCP_API_KEY_BUSINESS_INTENT
@@ -57,11 +64,11 @@ spec:
           readOnly: true
         resources:
           requests:
-            cpu: 1000m
-            memory: 2Gi
+            cpu: 250m
+            memory: 512Mi
           limits:
-            cpu: 2000m
-            memory: 4Gi
+            cpu: 1000m
+            memory: 1Gi
         livenessProbe:
           httpGet:
             path: /health

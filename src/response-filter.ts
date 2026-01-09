@@ -196,6 +196,7 @@ const ALLOWED_INPUT_FIELDS: Record<string, string[]> = {
     'context',
     'version',
     'isBundle',
+    'isBundled',  // TMF921 spec uses isBundled
     'intentExpectation',
     'intentSpecification',
     'expression',
@@ -219,6 +220,32 @@ const ALLOWED_INPUT_FIELDS: Record<string, string[]> = {
     'intentExpectation',
     'characteristic',
     'expression',
+    '@type'
+  ],
+
+  tmf921_intent_spec_create: [
+    'name',
+    'description',
+    'lifecycleStatus',
+    'version',
+    'validFor',
+    'expressionSpecification',
+    'characteristic',
+    'attachment',
+    'relatedParty',
+    '@type',
+    '@baseType',
+    '@schemaLocation',
+    'id',          // CTK sends this (will be overwritten)
+    'lastUpdate'   // CTK sends this (will be overwritten)
+  ],
+
+  tmf921_intent_spec_update: [
+    'description',
+    'lifecycleStatus',
+    'version',
+    'validFor',
+    'characteristic',
     '@type'
   ],
 };

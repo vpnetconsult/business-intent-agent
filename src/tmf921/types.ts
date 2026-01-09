@@ -75,6 +75,7 @@ export interface RelatedEntity {
   name?: string;
   role?: string;
   '@referredType'?: string;
+  '@type'?: string;
 }
 
 /**
@@ -242,5 +243,67 @@ export interface IntentEvent {
  */
 export interface IntentCollection {
   intent: Intent[];
+  '@type'?: string;
+}
+
+/**
+ * Intent Specification - Defines the template/blueprint for Intents
+ */
+export interface IntentSpecification {
+  // Core identifiers
+  id?: string;
+  href?: string;
+  name: string;
+  description?: string;
+
+  // Lifecycle
+  lifecycleStatus?: string;
+  version?: string;
+  lastUpdate?: string;
+
+  // Validity period
+  validFor?: TimePeriod;
+
+  // Expression specification
+  expressionSpecification?: IntentExpression;
+
+  // Metadata
+  characteristic?: Characteristic[];
+  attachment?: RelatedEntity[];
+  relatedParty?: RelatedEntity[];
+
+  // Polymorphism
+  '@type'?: string;
+  '@baseType'?: string;
+  '@schemaLocation'?: string;
+}
+
+/**
+ * Request body for creating an IntentSpecification
+ */
+export interface IntentSpecificationCreate {
+  name: string;
+  description?: string;
+  lifecycleStatus?: string;
+  version?: string;
+  validFor?: TimePeriod;
+  expressionSpecification?: IntentExpression;
+  characteristic?: Characteristic[];
+  attachment?: RelatedEntity[];
+  relatedParty?: RelatedEntity[];
+  '@type'?: string;
+  '@baseType'?: string;
+  '@schemaLocation'?: string;
+}
+
+/**
+ * Request body for updating an IntentSpecification
+ */
+export interface IntentSpecificationUpdate {
+  description?: string;
+  lifecycleStatus?: string;
+  version?: string;
+  validFor?: TimePeriod;
+  characteristic?: Characteristic[];
   '@type'?: string;
 }

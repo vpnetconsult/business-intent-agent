@@ -5,7 +5,18 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Intent, IntentCreate, IntentUpdate, IntentLifecycleStatus, IntentType, IntentReport, IntentReportEntry } from './types';
+import {
+  Intent,
+  IntentCreate,
+  IntentUpdate,
+  IntentLifecycleStatus,
+  IntentType,
+  IntentReport,
+  IntentReportEntry,
+  IntentSpecification,
+  IntentSpecificationCreate,
+  IntentSpecificationUpdate
+} from './types';
 import { IntentProcessor } from '../intent-processor';
 import { logger } from '../logger';
 
@@ -28,6 +39,11 @@ class IntentStore {
     lifecycleStatus?: IntentLifecycleStatus | string;
     intentType?: IntentType;
     relatedPartyId?: string;
+    name?: string;
+    priority?: number | string;
+    version?: string;
+    creationDate?: string;
+    lastUpdate?: string;
   }): Intent[] {
     let results = Array.from(this.intents.values());
 
@@ -43,6 +59,26 @@ class IntentStore {
       results = results.filter(i =>
         i.relatedParty?.some(p => p.id === filters.relatedPartyId)
       );
+    }
+
+    if (filters?.name) {
+      results = results.filter(i => i.name === filters.name);
+    }
+
+    if (filters?.priority !== undefined) {
+      results = results.filter(i => String(i.priority) === String(filters.priority));
+    }
+
+    if (filters?.version) {
+      results = results.filter(i => i.version === filters.version);
+    }
+
+    if (filters?.creationDate) {
+      results = results.filter(i => i.creationDate === filters.creationDate);
+    }
+
+    if (filters?.lastUpdate) {
+      results = results.filter(i => i.lastUpdate === filters.lastUpdate);
     }
 
     return results;
@@ -73,13 +109,76 @@ class IntentStore {
   }
 }
 
+/**
+ * In-memory storage for intent specifications
+ */
+class IntentSpecificationStore {
+  private specs: Map<string, IntentSpecification> = new Map();
+
+  save(spec: IntentSpecification): IntentSpecification {
+    this.specs.set(spec.id!, spec);
+    return spec;
+  }
+
+  findById(id: string): IntentSpecification | undefined {
+    return this.specs.get(id);
+  }
+
+  findAll(filters?: {
+    name?: string;
+    lifecycleStatus?: string;
+    version?: string;
+    lastUpdate?: string;
+  }): IntentSpecification[] {
+    let results = Array.from(this.specs.values());
+
+    if (filters?.name) {
+      results = results.filter(s => s.name === filters.name);
+    }
+
+    if (filters?.lifecycleStatus) {
+      results = results.filter(s => s.lifecycleStatus === filters.lifecycleStatus);
+    }
+
+    if (filters?.version) {
+      results = results.filter(s => s.version === filters.version);
+    }
+
+    if (filters?.lastUpdate) {
+      results = results.filter(s => s.lastUpdate === filters.lastUpdate);
+    }
+
+    return results;
+  }
+
+  delete(id: string): boolean {
+    return this.specs.delete(id);
+  }
+
+  update(id: string, updates: Partial<IntentSpecification>): IntentSpecification | undefined {
+    const spec = this.specs.get(id);
+    if (!spec) return undefined;
+
+    const updated = {
+      ...spec,
+      ...updates,
+      lastUpdate: new Date().toISOString(),
+    };
+
+    this.specs.set(id, updated);
+    return updated;
+  }
+}
+
 export class TMF921IntentService {
   private store: IntentStore;
+  private specStore: IntentSpecificationStore;
 
   constructor(
     private intentProcessor: IntentProcessor
   ) {
     this.store = new IntentStore();
+    this.specStore = new IntentSpecificationStore();
   }
 
   /**
@@ -112,7 +211,7 @@ export class TMF921IntentService {
       // Versioning and context
       version: intentCreate.version || '1.0',
       context: intentCreate.context,
-      isBundle: intentCreate.isBundle || false,
+      isBundle: (intentCreate as any).isBundled ?? intentCreate.isBundle ?? false,
 
       // Expectations and specifications
       intentExpectation: intentCreate.intentExpectation || [],
@@ -125,12 +224,16 @@ export class TMF921IntentService {
 
       // Relationships
       intentRelationship: intentCreate.intentRelationship || [],
-      relatedParty: intentCreate.relatedParty || [
+      relatedParty: [
+        // Always include authenticated customer for ownership
         {
           id: customerId,
           role: 'customer',
-          '@referredType': 'Individual'
-        }
+          '@referredType': 'Individual',
+          '@type': 'RelatedParty'
+        },
+        // Include any additional parties from request (if provided)
+        ...(intentCreate.relatedParty || [])
       ],
 
       // Reporting
@@ -169,6 +272,11 @@ export class TMF921IntentService {
     lifecycleStatus?: IntentLifecycleStatus | string;
     intentType?: IntentType;
     relatedPartyId?: string;
+    name?: string;
+    priority?: number | string;
+    version?: string;
+    creationDate?: string;
+    lastUpdate?: string;
     limit?: number;
     offset?: number;
   }): Promise<Intent[]> {
@@ -176,6 +284,11 @@ export class TMF921IntentService {
       lifecycleStatus: filters?.lifecycleStatus,
       intentType: filters?.intentType,
       relatedPartyId: filters?.relatedPartyId,
+      name: filters?.name,
+      priority: filters?.priority,
+      version: filters?.version,
+      creationDate: filters?.creationDate,
+      lastUpdate: filters?.lastUpdate,
     });
 
     // Pagination
@@ -218,6 +331,28 @@ export class TMF921IntentService {
     }
 
     return deleted;
+  }
+
+  /**
+   * Delete an IntentReport from an Intent
+   */
+  async deleteIntentReport(intentId: string, reportId: string): Promise<boolean> {
+    const intent = this.store.findById(intentId);
+    if (!intent || !intent.intentReport) return false;
+
+    const initialLength = intent.intentReport.length;
+    const filtered = intent.intentReport.filter(r => r.id !== reportId);
+
+    if (filtered.length === initialLength) {
+      return false; // Report not found
+    }
+
+    this.store.update(intentId, {
+      intentReport: filtered
+    });
+
+    logger.info({ intentId, reportId }, 'TMF921 IntentReport deleted');
+    return true;
   }
 
   /**
@@ -308,5 +443,81 @@ export class TMF921IntentService {
 
     // Fallback: name
     return intent.name;
+  }
+
+  /**
+   * Create a new IntentSpecification (POST /tmf-api/intentManagement/v5/intentSpecification)
+   */
+  async createIntentSpecification(specCreate: IntentSpecificationCreate): Promise<IntentSpecification> {
+    const now = new Date().toISOString();
+    const specId = uuidv4();
+
+    const spec: IntentSpecification = {
+      id: specId,
+      href: `/tmf-api/intentManagement/v5/intentSpecification/${specId}`,
+      name: specCreate.name,
+      description: specCreate.description,
+      lifecycleStatus: specCreate.lifecycleStatus || 'ACTIVE',
+      version: specCreate.version || '1.0',
+      lastUpdate: now,
+      validFor: specCreate.validFor,
+      expressionSpecification: specCreate.expressionSpecification,
+      characteristic: specCreate.characteristic || [],
+      attachment: specCreate.attachment || [],
+      relatedParty: specCreate.relatedParty || [],
+      '@type': specCreate['@type'] || 'IntentSpecification',
+      '@baseType': specCreate['@baseType'],
+      '@schemaLocation': specCreate['@schemaLocation']
+    };
+
+    this.specStore.save(spec);
+    logger.info({ specId, name: spec.name }, 'TMF921 IntentSpecification created');
+
+    return spec;
+  }
+
+  /**
+   * Retrieve an IntentSpecification by ID (GET /tmf-api/intentManagement/v5/intentSpecification/{id})
+   */
+  async getIntentSpecification(id: string): Promise<IntentSpecification | undefined> {
+    return this.specStore.findById(id);
+  }
+
+  /**
+   * List IntentSpecifications with optional filters (GET /tmf-api/intentManagement/v5/intentSpecification)
+   */
+  async listIntentSpecifications(filters?: {
+    name?: string;
+    lifecycleStatus?: string;
+    version?: string;
+    lastUpdate?: string;
+  }): Promise<IntentSpecification[]> {
+    return this.specStore.findAll(filters);
+  }
+
+  /**
+   * Update an IntentSpecification (PATCH /tmf-api/intentManagement/v5/intentSpecification/{id})
+   */
+  async updateIntentSpecification(id: string, updates: IntentSpecificationUpdate): Promise<IntentSpecification | undefined> {
+    const updated = this.specStore.update(id, updates);
+
+    if (updated) {
+      logger.info({ specId: id, updates }, 'TMF921 IntentSpecification updated');
+    }
+
+    return updated;
+  }
+
+  /**
+   * Delete an IntentSpecification (DELETE /tmf-api/intentManagement/v5/intentSpecification/{id})
+   */
+  async deleteIntentSpecification(id: string): Promise<boolean> {
+    const deleted = this.specStore.delete(id);
+
+    if (deleted) {
+      logger.info({ specId: id }, 'TMF921 IntentSpecification deleted');
+    }
+
+    return deleted;
   }
 }
