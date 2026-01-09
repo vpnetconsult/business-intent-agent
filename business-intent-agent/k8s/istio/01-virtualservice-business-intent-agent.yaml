@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: business-intent-agent-vs
+  namespace: intent-platform
+  labels:
+    app: business-intent-agent
+    managed-by: istio
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - intent-platform-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/intent
+    - uri:
+        prefix: /tmf-api/intentManagement/v5
+    - uri:
+        prefix: /health
+    - uri:
+        prefix: /ready
+    - uri:
+        prefix: /metrics
+    route:
+    - destination:
+        host: business-intent-agent-service.intent-platform.svc.cluster.local
+        port:
+          number: 8080
+    timeout: 30s  # Overall timeout for API calls (handles long AI requests)
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: 5xx,reset,connect-failure,refused-stream

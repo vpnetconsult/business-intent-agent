@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: intent-platform-gateway
+  namespace: intent-platform
+  labels:
+    app: istio-gateway
+    managed-by: istio
+spec:
+  selector:
+    istio: ingressgateway  # Use Istio default ingress gateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: intent-platform-tls  # Optional: for future TLS certificate support
+    hosts:
+    - "*"

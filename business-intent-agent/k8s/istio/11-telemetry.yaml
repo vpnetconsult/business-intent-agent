@@ -1,0 +1,27 @@
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: intent-platform-telemetry
+  namespace: intent-platform
+  labels:
+    managed-by: istio
+spec:
+  tracing:
+  - providers:
+    - name: jaeger
+    randomSamplingPercentage: 100.0  # 100% for local dev, reduce to 1-10% in production
+    customTags:
+      environment:
+        literal:
+          value: "local"
+      namespace:
+        literal:
+          value: "intent-platform"
+  metrics:
+  - providers:
+    - name: prometheus
+    dimensions:
+      request_protocol: request.protocol
+      response_code: response.code
+      source_version: source.labels["version"]
+      destination_version: destination.labels["version"]

@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: customer-data-mcp-dr
+  namespace: intent-platform
+  labels:
+    app: customer-data-mcp
+    managed-by: istio
+spec:
+  host: customer-data-mcp-service.intent-platform.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    connectionPool:
+      tcp:
+        maxConnections: 50
+        connectTimeout: 2s
+      http:
+        http1MaxPendingRequests: 25
+        http2MaxRequests: 50
+        maxRequestsPerConnection: 5
+    outlierDetection:
+      consecutiveErrors: 3
+      interval: 20s
+      baseEjectionTime: 20s
+      maxEjectionPercent: 100  # Single replica, allow full ejection
