@@ -5,6 +5,117 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-01-10
+
+### Added
+
+#### Istio Service Mesh Integration
+
+- **Service Mesh Architecture** - Complete Istio service mesh implementation
+  - mTLS STRICT mode for all service-to-service communication
+  - Automatic mutual TLS certificate management
+  - Zero-trust network security model
+  - Service identity and authentication
+
+- **Traffic Management** - Advanced routing and resilience
+  - Gateway configuration for external traffic (NodePort for local dev)
+  - VirtualServices with intelligent routing rules
+  - DestinationRules with load balancing strategies
+    - LEAST_REQUEST for business-intent-agent (AI workload optimization)
+    - ROUND_ROBIN for MCP services
+  - Connection pooling and circuit breakers
+  - Retry policies (3 attempts on 5xx, reset, connect-failure)
+  - Timeout configurations (30s for AI requests, 10s for MCP services)
+  - ServiceEntry for external Anthropic API access
+
+- **Observability Stack** - Full distributed tracing and monitoring
+  - **Kiali** - Service mesh visualization and topology (port 20001)
+    - Real-time traffic flow visualization
+    - mTLS status indicators
+    - Configuration validation
+  - **Jaeger** - Distributed tracing (port 16686)
+    - End-to-end request tracing through all services
+    - Latency analysis and bottleneck identification
+    - 100% sampling for local development
+  - **Prometheus** - Metrics collection (port 9090)
+    - Default Istio metrics (request rate, latency, error rate)
+    - Service-level indicators
+  - **Grafana** - Pre-built dashboards (port 3000)
+    - Istio Mesh Dashboard
+    - Istio Service Dashboard
+    - Istio Workload Dashboard
+
+- **Telemetry Configuration**
+  - Jaeger tracing integration with custom tags
+  - Environment and namespace tagging
+  - Prometheus metrics collection
+  - Optimized metric dimensions (removed redundant custom dimensions)
+
+- **Infrastructure Documentation**
+  - Comprehensive Istio setup guide (business-intent-agent/k8s/istio/README.md)
+  - Installation procedures with istioctl
+  - Verification and validation steps
+  - Troubleshooting runbooks
+  - Performance impact analysis (~2-5ms latency per hop)
+  - Resource requirements (additional 2 CPU cores, 8GB RAM)
+  - Gradual rollout strategy (PERMISSIVE → STRICT mTLS)
+  - Complete rollback procedures
+
+### Changed
+
+- **Network Security** - All services now communicate via encrypted mTLS
+- **Load Balancing** - Intelligent load distribution based on workload characteristics
+- **External API Access** - Anthropic API now routed through Istio with retry policies
+- **Service Discovery** - Istio service registry integration
+- **Telemetry** - Simplified Prometheus configuration using default Istio metrics
+
+### Security
+
+#### Vulnerability Fixes
+- **CVE-2025-15284** - Fixed qs package DoS vulnerability
+  - Updated qs to version 6.14.1 in all MCP services
+  - Resolved arrayLimit bypass allowing memory exhaustion attacks
+  - CVSS Score: 7.5 (High)
+  - Affected services: customer-data-mcp, knowledge-graph-mcp, bss-oss-mcp
+  - Fixed transitive dependency vulnerability
+
+#### Service Mesh Security
+- Implements zero-trust network architecture
+- Mutual TLS for all service-to-service communication
+- Certificate rotation and management via Istio CA
+- Service identity validation
+- Encrypted traffic by default
+- Network policy enforcement via mTLS STRICT mode
+
+### Performance
+
+- **Latency Impact:** Additional 2-5ms per request due to sidecar processing
+- **mTLS Overhead:** +0.5-1ms per connection
+- **Mitigation Strategies:**
+  - Connection pooling enabled
+  - HTTP/2 multiplexing
+  - Keep-alive connections
+  - LEAST_REQUEST load balancing for variable AI latency
+
+### Infrastructure
+
+- **Istio Control Plane** - 7 new components in istio-system namespace
+  - istiod (control plane)
+  - istio-ingressgateway (NodePort: 31355)
+  - istio-egressgateway
+  - kiali, jaeger, prometheus, grafana
+- **Sidecar Injection** - All pods now run 2/2 containers (app + envoy proxy)
+- **Resource Overhead:**
+  - Control plane: ~1.5 CPU cores, ~7GB RAM
+  - Data plane: ~100m CPU and ~128Mi RAM per sidecar
+
+### Operations
+
+- **Port Forwarding** - Automated port forwarding setup for all dashboards
+- **Health Checks** - Istio-aware health probes
+- **Monitoring** - Real-time visibility into service mesh health
+- **Configuration** - 13 Istio resource files for complete mesh configuration
+
 ## [1.1.0] - 2025-12-26
 
 ### Added
