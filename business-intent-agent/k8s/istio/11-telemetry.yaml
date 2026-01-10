@@ -20,8 +20,3 @@ spec:
   metrics:
   - providers:
     - name: prometheus
-    dimensions:
-      request_protocol: request.protocol
-      response_code: response.code
-      source_version: source.labels["version"]
-      destination_version: destination.labels["version"]
