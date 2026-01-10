@@ -1,0 +1,192 @@
+@prefix tmf620: <https://www.tmforum.org/ontologies/tmf620#> .
+@prefix sch: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix intent: <https://intent-platform.example.com/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ==========================================
+# PHASE 2 PRODUCT 1: Broadband 1Gbps
+# ==========================================
+
+<https://intent-platform.example.com/product/PROD-BB-1GB>
+    a sch:Product , tmf620:ProductOffering ;
+    sch:name "Broadband 1Gbps"@en ;
+    sch:description "Ultra-fast fiber broadband with 1Gbps download, mesh WiFi, and priority support"@en ;
+    sch:identifier "PROD-BB-1GB" ;
+    sch:sku "PROD-BB-1GB" ;
+    tmf620:productOfferingId "PROD-BB-1GB" ;
+    tmf620:productOfferingType "broadband" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "2.0" ;
+    dc:created "2025-01-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent:popularityScore 88 ;
+    intent:customerSegment "premium" ;
+    intent:aiRecommendationWeight "0.85"^^xsd:decimal ;
+    intent:downloadSpeed 1000 ;
+    intent:uploadSpeed 100 ;
+    intent:speedUnit "Mbps" ;
+    intent:dataCapacity "Unlimited" ;
+    intent:features "unlimited_data", "fiber", "mesh_wifi", "priority_support" ;
+    intent:priceAmount "59.99"^^xsd:decimal ;
+    intent:priceCurrency "EUR" .
+
+# ==========================================
+# PHASE 2 PRODUCT 2: Mobile 50GB
+# ==========================================
+
+<https://intent-platform.example.com/product/PROD-MOB-50GB>
+    a sch:Product , tmf620:ProductOffering ;
+    sch:name "Mobile 50GB"@en ;
+    sch:description "5G mobile plan with 50GB data, unlimited calls, and EU roaming"@en ;
+    sch:identifier "PROD-MOB-50GB" ;
+    sch:sku "PROD-MOB-50GB" ;
+    tmf620:productOfferingId "PROD-MOB-50GB" ;
+    tmf620:productOfferingType "mobile" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "1.5" ;
+    dc:created "2025-02-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent:popularityScore 78 ;
+    intent:customerSegment "standard" ;
+    intent:aiRecommendationWeight "0.75"^^xsd:decimal ;
+    intent:dataCapacity "50GB" ;
+    intent:networkType "5G" ;
+    intent:callsIncluded "Unlimited" ;
+    intent:smsIncluded "Unlimited" ;
+    intent:roaming "EU" ;
+    intent:features "5g", "unlimited_calls", "eu_roaming" ;
+    intent:priceAmount "25.00"^^xsd:decimal ;
+    intent:priceCurrency "EUR" .
+
+# ==========================================
+# PHASE 2 PRODUCT 3: TV Basic
+# ==========================================
+
+<https://intent-platform.example.com/product/PROD-TV-BASIC>
+    a sch:Product , tmf620:ProductOffering ;
+    sch:name "TV Basic"@en ;
+    sch:description "Basic TV package with 100 HD channels, recording, and 2 simultaneous streams"@en ;
+    sch:identifier "PROD-TV-BASIC" ;
+    sch:sku "PROD-TV-BASIC" ;
+    tmf620:productOfferingId "PROD-TV-BASIC" ;
+    tmf620:productOfferingType "tv" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "1.0" ;
+    dc:created "2025-03-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent:popularityScore 65 ;
+    intent:customerSegment "basic" ;
+    intent:aiRecommendationWeight "0.65"^^xsd:decimal ;
+    intent:channelCount 100 ;
+    intent:videoQuality "HD" ;
+    intent:simultaneousStreams 2 ;
+    intent:recordingEnabled true ;
+    intent:features "hd", "recording", "2_screens" ;
+    intent:priceAmount "15.00"^^xsd:decimal ;
+    intent:priceCurrency "EUR" .
+
+# ==========================================
+# PHASE 2 PRODUCT 4: TV Premium
+# ==========================================
+
+<https://intent-platform.example.com/product/PROD-TV-PREMIUM>
+    a sch:Product , tmf620:ProductOffering ;
+    sch:name "TV Premium"@en ;
+    sch:description "Premium TV package with 200 4K channels, sports, movies, and 5 simultaneous streams"@en ;
+    sch:identifier "PROD-TV-PREMIUM" ;
+    sch:sku "PROD-TV-PREMIUM" ;
+    tmf620:productOfferingId "PROD-TV-PREMIUM" ;
+    tmf620:productOfferingType "tv" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "2.5" ;
+    dc:created "2025-03-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent:popularityScore 82 ;
+    intent:customerSegment "premium" ;
+    intent:aiRecommendationWeight "0.80"^^xsd:decimal ;
+    intent:channelCount 200 ;
+    intent:videoQuality "4K" ;
+    intent:simultaneousStreams 5 ;
+    intent:recordingEnabled true ;
+    intent:sportsContent true ;
+    intent:moviesContent true ;
+    intent:features "4k", "recording", "5_screens", "sports", "movies" ;
+    intent:priceAmount "25.00"^^xsd:decimal ;
+    intent:priceCurrency "EUR" .
+
+# ==========================================
+# UPGRADE RELATIONSHIPS
+# ==========================================
+
+# Broadband Upgrade Path
+<https://intent-platform.example.com/product/PROD-BB-500>
+    intent:upgradesTo <https://intent-platform.example.com/product/PROD-BB-1GB> ;
+    intent:upgradePriceDifference "20.00"^^xsd:decimal .
+
+# Mobile Upgrade Path
+<https://intent-platform.example.com/product/PROD-MOB-50GB>
+    intent:upgradesTo <https://intent-platform.example.com/product/PROD-MOB-UNL> ;
+    intent:upgradePriceDifference "10.00"^^xsd:decimal .
+
+# TV Upgrade Path
+<https://intent-platform.example.com/product/PROD-TV-BASIC>
+    intent:upgradesTo <https://intent-platform.example.com/product/PROD-TV-PREMIUM> ;
+    intent:upgradePriceDifference "10.00"^^xsd:decimal .
+
+# ==========================================
+# PRODUCT COMPLEMENTARITY RELATIONSHIPS
+# ==========================================
+
+# Broadband 1Gbps complements mobile products
+<https://intent-platform.example.com/product/PROD-BB-1GB>
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-MOB-50GB> ;
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-MOB-UNL> ;
+    intent:complementsProduct <https://intent-platform.example.com/product/PROD-MOB-50GB> ;
+    intent:complementsProduct <https://intent-platform.example.com/product/PROD-MOB-UNL> ;
+    intent:complementStrength "0.90"^^xsd:decimal .
+
+# Broadband 1Gbps complements TV products
+<https://intent-platform.example.com/product/PROD-BB-1GB>
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-TV-BASIC> ;
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-TV-PREMIUM> ;
+    intent:complementsProduct <https://intent-platform.example.com/product/PROD-TV-BASIC> ;
+    intent:complementsProduct <https://intent-platform.example.com/product/PROD-TV-PREMIUM> ;
+    intent:complementStrength "0.75"^^xsd:decimal .
+
+# Mobile 50GB complements TV products
+<https://intent-platform.example.com/product/PROD-MOB-50GB>
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-TV-BASIC> ;
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-TV-PREMIUM> ;
+    intent:complementsProduct <https://intent-platform.example.com/product/PROD-TV-BASIC> ;
+    intent:complementsProduct <https://intent-platform.example.com/product/PROD-TV-PREMIUM> ;
+    intent:complementStrength "0.60"^^xsd:decimal .
+
+# ==========================================
+# BUNDLE AFFINITY (for future bundle RDF transformation)
+# ==========================================
+
+# Broadband 1Gbps is in Gaming and Streaming bundles
+<https://intent-platform.example.com/product/PROD-BB-1GB>
+    intent:includedinBundle "BUNDLE-GAMING" ;
+    intent:includedinBundle "BUNDLE-STREAMING" ;
+    intent:includedinBundle "BUNDLE-FAMILY" .
+
+# Mobile 50GB is in WFH and Family bundles
+<https://intent-platform.example.com/product/PROD-MOB-50GB>
+    intent:includedinBundle "BUNDLE-WFH-PREMIUM" ;
+    intent:includedinBundle "BUNDLE-FAMILY" ;
+    intent:includedinBundle "BUNDLE-STREAMING" .
+
+# TV Basic is in Family bundle
+<https://intent-platform.example.com/product/PROD-TV-BASIC>
+    intent:includedinBundle "BUNDLE-FAMILY" .
+
+# TV Premium is in Streaming bundle
+<https://intent-platform.example.com/product/PROD-TV-PREMIUM>
+    intent:includedinBundle "BUNDLE-STREAMING" .
