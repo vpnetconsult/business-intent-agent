@@ -1,0 +1,106 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Customer/API Client
+    participant API as Business Intent Agent<br/>(Express API)
+    participant Auth as Authentication<br/>Middleware
+    participant RateLimit as Rate Limiter
+    participant TMF921 as TMF921 Intent Service
+    participant IntentProc as Intent Processor
+    participant PII as PII Masking Service
+    participant CustomerMCP as Customer Data MCP
+    participant Claude as Claude AI<br/>(Sonnet 4.5)
+    participant BSSMCP as BSS/OSS MCP
+    participant KnowledgeMCP as Knowledge Graph MCP
+    participant ResponseFilter as Response Filter<br/>(RBAC)
+
+    %% Step 1-4: Request Authentication & Validation
+    Customer->>+API: POST /tmf-api/intentManagement/v5/intent<br/>{name, description, intentType}
+    API->>+Auth: Authenticate API Key
+    Auth->>Auth: Validate Bearer Token
+    Auth->>Auth: Verify Customer Ownership
+    Auth-->>-API: ✓ Authenticated (customerId: CUST-001)
+
+    API->>+RateLimit: Check Rate Limit
+    RateLimit->>RateLimit: Verify: < 100 req/min
+    RateLimit-->>-API: ✓ Within Limits
+
+    %% Step 5-7: TMF921 Intent Creation
+    API->>+TMF921: createIntent(intentCreate, customerId)
+    TMF921->>TMF921: Generate Intent ID (UUID)
+    TMF921->>TMF921: Set lifecycleStatus = ACKNOWLEDGED
+    TMF921->>TMF921: Add relatedParty (customer)
+    TMF921->>TMF921: Store Intent
+    TMF921-->>API: Intent Created<br/>{id, lifecycleStatus: ACKNOWLEDGED}
+
+    %% Step 8: Async Processing Starts
+    TMF921->>+IntentProc: processIntentAsync(intent, customerId)
+    Note over TMF921,IntentProc: Async processing begins<br/>API responds immediately
+    API-->>-Customer: 201 Created<br/>{intent: {...}, lifecycleStatus: ACKNOWLEDGED}
+
+    %% Step 9: Update to IN_PROGRESS
+    IntentProc->>TMF921: Update lifecycleStatus = IN_PROGRESS
+    TMF921->>TMF921: Add IntentReport: "processing started"
+
+    %% Step 10-12: Get Customer Profile
+    IntentProc->>+CustomerMCP: get_customer_profile(CUST-001)
+    CustomerMCP->>CustomerMCP: Query Customer DB
+    CustomerMCP-->>-IntentProc: {customerId, name, email,<br/>segment: premium, creditScore: excellent}
+
+    %% Step 13-16: PII Masking (GDPR Compliance)
+    IntentProc->>+PII: maskCustomerProfile(profile)
+    PII->>PII: Hash name: SHA-256
+    PII->>PII: Remove email (high-risk PII)
+    PII->>PII: Generalize location: Dublin, Ireland
+    PII->>PII: Tier credit score: excellent → high
+    PII->>PII: Validate no raw PII remains
+    PII-->>-IntentProc: Masked Profile<br/>{customer_id_hash, segment, credit_tier: high}
+
+    %% Step 17-19: AI Intent Analysis
+    IntentProc->>+Claude: analyzeIntent(intent, maskedProfile)
+    Note over Claude: Claude Sonnet 4.5<br/>Analyzes: "I want to upgrade<br/>my mobile plan"
+    Claude->>Claude: Extract intent tags:<br/>[mobile, upgrade, data]
+    Claude->>Claude: Identify product types:<br/>[5G_PLAN, DATA_ADDON]
+    Claude-->>-IntentProc: {tags: [mobile, upgrade],<br/>product_types: [5G_PLAN, DATA_ADDON],<br/>confidence: 0.95}
+
+    %% Step 20-22: Search Product Catalog
+    IntentProc->>+BSSMCP: search_product_catalog({<br/>intent: [mobile, upgrade],<br/>customer_segment: premium})
+    BSSMCP->>BSSMCP: Query Product Catalog
+    BSSMCP->>BSSMCP: Filter by segment eligibility
+    BSSMCP-->>-IntentProc: [{id: 5G-UNLIMITED,<br/>name: 5G Unlimited Premium,<br/>price: 49.99}]
+
+    %% Step 23-25: Find Related Products (Bundles)
+    IntentProc->>+KnowledgeMCP: find_related_products({<br/>base_products: [5G_PLAN]})
+    KnowledgeMCP->>KnowledgeMCP: Query Neo4j Graph:<br/>MATCH (p:Product)-[:BUNDLED_WITH]->(b:Bundle)
+    KnowledgeMCP-->>-IntentProc: [{id: PREMIUM-BUNDLE,<br/>name: 5G + Netflix + Disney+,<br/>discount: 15%}]
+
+    %% Step 26-28: Generate Personalized Offer
+    IntentProc->>+Claude: generateOffer({intent, customer,<br/>products, bundles})
+    Note over Claude: AI-powered personalization<br/>based on customer segment
+    Claude->>Claude: Analyze customer preferences
+    Claude->>Claude: Calculate optimal bundle
+    Claude->>Claude: Determine discount eligibility
+    Claude-->>-IntentProc: {name: Premium 5G Bundle,<br/>selected_products: [5G-UNLIMITED, NETFLIX],<br/>recommended_discounts: [{type: loyalty, value: 10%}]}
+
+    %% Step 29-31: Generate Quote (Order)
+    IntentProc->>+BSSMCP: generate_quote({<br/>customer_id: CUST-001,<br/>products: [5G-UNLIMITED, NETFLIX],<br/>discounts: [loyalty: 10%]})
+    BSSMCP->>BSSMCP: Calculate pricing
+    BSSMCP->>BSSMCP: Apply discounts
+    BSSMCP->>BSSMCP: Generate quote ID
+    BSSMCP-->>-IntentProc: {quote_id: Q-12345,<br/>total_monthly: 54.99,<br/>discount_applied: 10%,<br/>valid_until: 2026-01-17}
+
+    %% Step 32-33: Update Intent to COMPLETED
+    IntentProc->>TMF921: Update lifecycleStatus = COMPLETED
+    TMF921->>TMF921: Add IntentReport: "completed"<br/>{offer, products, quote}
+    IntentProc-->>-TMF921: Processing Complete
+
+    %% Step 34: Customer Polls for Status
+    Customer->>+API: GET /tmf-api/intentManagement/v5/intent/{id}
+    API->>+TMF921: getIntent(id)
+    TMF921-->>-API: Intent with lifecycleStatus: COMPLETED
+    API->>+ResponseFilter: Filter response by customer role
+    ResponseFilter->>ResponseFilter: Redact PII for customer role
+    ResponseFilter->>ResponseFilter: Remove internal fields
+    ResponseFilter-->>-API: Filtered Response
+    API-->>-Customer: 200 OK<br/>{intent, lifecycleStatus: COMPLETED,<br/>offer, quote}
+
+    Note over Customer,API: Customer can now proceed<br/>to checkout/payment with quote Q-12345

@@ -1,0 +1,42 @@
+@startuml O2C_Authentication_Failure
+autonumber
+title Order-to-Cash - Authentication Failure
+
+actor "Customer/API Client" as Customer
+participant "Business Intent Agent" as API
+participant "Authentication\nMiddleware" as Auth
+participant "Prometheus Metrics" as Metrics
+participant "Audit Logger" as Logger
+
+Customer -> API: POST /tmf-api/intentManagement/v5/intent\nAuthorization: Bearer invalid_key_123
+activate API
+
+API -> Auth: Authenticate API Key
+activate Auth
+
+Auth -> Auth: Extract Bearer token
+Auth -> Auth: Lookup API key in secrets
+Auth -> Auth: ✗ API key not found
+
+Auth -> Metrics: auth_failure_total{reason="invalid_key"}++
+activate Metrics
+Metrics --> Auth: Metric recorded
+deactivate Metrics
+
+Auth -> Logger: Log authentication failure\n{ip, timestamp, key_prefix}
+activate Logger
+Logger --> Auth: Audit log created
+deactivate Logger
+
+Auth --> API: 401 Unauthorized
+deactivate Auth
+
+API --> Customer: 401 Unauthorized\n{error: "Invalid API key",\nmessage: "Authentication required"}
+deactivate API
+
+note over Customer,API
+  Intent not created
+  Customer must obtain valid API key
+end note
+
+@enduml

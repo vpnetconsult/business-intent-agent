@@ -1,0 +1,97 @@
+graph TB
+    subgraph "External"
+        Customer["Customer/API Client<br/>(Web/Mobile App)"]
+        Claude["Claude AI API<br/>(Anthropic Sonnet 4.5)"]
+    end
+
+    subgraph "Kubernetes Cluster - intent-platform namespace"
+        subgraph "Business Intent Agent Pod"
+            API["Express API<br/>:8080"]
+            Auth["Authentication<br/>Middleware"]
+            RateLimit["Rate Limiter<br/>(100 req/min)"]
+            TMF921["TMF921 Intent Service<br/>(Lifecycle Management)"]
+            IntentProc["Intent Processor<br/>(Core Logic)"]
+            PII["PII Masking Service<br/>(GDPR Compliance)"]
+            ResponseFilter["Response Filter<br/>(RBAC)"]
+        end
+
+        subgraph "MCP Services"
+            CustomerMCP["Customer Data MCP<br/>:8081"]
+            BSSMCP["BSS/OSS MCP<br/>:8082"]
+            KnowledgeMCP["Knowledge Graph MCP<br/>:8083"]
+        end
+
+        subgraph "Data Layer"
+            Neo4j["Neo4j Graph DB<br/>(Products & Bundles)"]
+        end
+
+        subgraph "Observability"
+            Prometheus["Prometheus<br/>(Metrics)"]
+            Grafana["Grafana<br/>(Dashboards)"]
+            Pino["Pino Logger<br/>(Structured Logs)"]
+        end
+    end
+
+    subgraph "Security Layer"
+        K8sSecrets["Kubernetes Secrets<br/>(etcd encrypted - AESCBC)"]
+        Istio["Istio Service Mesh<br/>(mTLS)"]
+    end
+
+    %% External Connections
+    Customer -->|"1. POST /tmf-api/intentManagement/v5/intent<br/>Bearer token"| API
+    API -->|"5. analyzeIntent()<br/>(masked PII)"| Claude
+    API -->|"8. generateOffer()<br/>(masked PII)"| Claude
+
+    %% Internal Flow
+    API --> Auth
+    Auth --> RateLimit
+    RateLimit --> TMF921
+    TMF921 -->|"processIntentAsync()"| IntentProc
+    IntentProc --> PII
+    IntentProc -->|"get_customer_profile()"| CustomerMCP
+    IntentProc -->|"search_product_catalog()"| BSSMCP
+    IntentProc -->|"generate_quote()"| BSSMCP
+    IntentProc -->|"find_related_products()"| KnowledgeMCP
+
+    %% MCP to Data
+    CustomerMCP -.->|"Mock data<br/>(in-memory)"| CustomerMCP
+    BSSMCP -.->|"Mock data<br/>(in-memory)"| BSSMCP
+    KnowledgeMCP -->|"Cypher queries"| Neo4j
+
+    %% Security
+    API --> K8sSecrets
+    Auth --> K8sSecrets
+    API -.->|"mTLS"| Istio
+    CustomerMCP -.->|"mTLS"| Istio
+    BSSMCP -.->|"mTLS"| Istio
+    KnowledgeMCP -.->|"mTLS"| Istio
+
+    %% Observability
+    API --> Prometheus
+    TMF921 --> Prometheus
+    IntentProc --> Prometheus
+    PII --> Prometheus
+    API --> Pino
+    TMF921 --> Pino
+    IntentProc --> Pino
+    Prometheus --> Grafana
+
+    %% Response Path
+    TMF921 --> ResponseFilter
+    ResponseFilter --> API
+    API -->|"201 Created<br/>200 OK"| Customer
+
+    %% Styling
+    classDef external fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    classDef api fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    classDef security fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef data fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef observability fill:#ffccbc,stroke:#bf360c,stroke-width:2px
+    classDef mcp fill:#b3e5fc,stroke:#0277bd,stroke-width:2px
+
+    class Customer,Claude external
+    class API,Auth,RateLimit,TMF921,IntentProc,PII,ResponseFilter api
+    class K8sSecrets,Istio security
+    class Neo4j data
+    class Prometheus,Grafana,Pino observability
+    class CustomerMCP,BSSMCP,KnowledgeMCP mcp

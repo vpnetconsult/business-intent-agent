@@ -1,0 +1,53 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Customer/API Client
+    participant API as Business Intent Agent
+    participant Auth as Authentication
+    participant TMF921 as TMF921 Intent Service
+    participant IntentProc as Intent Processor
+    participant CustomerMCP as Customer Data MCP
+    participant PII as PII Masking Service
+    participant Metrics as Prometheus Metrics
+    participant Logger as Security Logger
+
+    Customer->>+API: POST /tmf-api/intentManagement/v5/intent
+    API->>+Auth: Authenticate API Key
+    Auth-->>-API: ✓ Authenticated (CUST-001)
+
+    API->>+TMF921: createIntent(intentCreate, customerId)
+    TMF921->>TMF921: Create Intent (ACKNOWLEDGED)
+    TMF921-->>API: Intent Created
+    API-->>-Customer: 201 Created
+
+    TMF921->>+IntentProc: processIntentAsync()
+    IntentProc->>TMF921: Update status = IN_PROGRESS
+
+    IntentProc->>+CustomerMCP: get_customer_profile(CUST-001)
+    CustomerMCP-->>-IntentProc: Customer Profile
+
+    IntentProc->>+PII: maskCustomerProfile(profile)
+    PII->>PII: Mask PII fields
+
+    %% PII Validation Fails
+    PII->>PII: validateNoRawPII(maskedProfile)
+    PII->>PII: ✗ VIOLATION: Raw email detected<br/>"john.doe@example.com"
+    PII->>PII: ✗ VIOLATION: Raw phone detected<br/>"+353-1-234-5678"
+
+    PII->>+Metrics: pii_masking_failures_total++
+    Metrics-->>-PII: Metric recorded
+
+    PII->>+Logger: ERROR: PII validation failed<br/>{violations: [email, phone],<br/>customerId: REDACTED}
+    Logger-->>-PII: Security log created
+
+    PII-->>-IntentProc: Error: PII validation failed
+
+    IntentProc->>TMF921: Update lifecycleStatus = FAILED
+    TMF921->>TMF921: Add IntentReport: "failed"<br/>reason: "PII validation error"
+    IntentProc-->>-TMF921: Processing Failed
+
+    Customer->>+API: GET /tmf-api/intentManagement/v5/intent/{id}
+    API->>+TMF921: getIntent(id)
+    TMF921-->>-API: Intent (lifecycleStatus: FAILED)
+    API-->>-Customer: 200 OK<br/>{lifecycleStatus: FAILED,<br/>error: "Data protection error"}
+
+    Note over Customer,API: GDPR compliance enforced<br/>Raw PII never sent to external AI
