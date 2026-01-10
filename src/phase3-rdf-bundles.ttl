@@ -1,0 +1,244 @@
+@prefix tmf620: <https://www.tmforum.org/ontologies/tmf620#> .
+@prefix sch: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix intent: <https://intent-platform.example.com/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ==========================================
+# PHASE 3 BUNDLE 1: Work-from-Home Premium Bundle
+# ==========================================
+
+<https://intent-platform.example.com/bundle/BUNDLE-WFH-PREMIUM>
+    a sch:Offer , tmf620:BundledProductOffering ;
+    sch:name "Work-from-Home Premium Bundle"@en ;
+    sch:description "Perfect for professionals working from home with high-speed broadband and reliable mobile"@en ;
+    sch:identifier "BUNDLE-WFH-PREMIUM" ;
+    sch:sku "BUNDLE-WFH-PREMIUM" ;
+    tmf620:bundleId "BUNDLE-WFH-PREMIUM" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "1.0" ;
+    dc:created "2025-01-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent__popularityScore 92 ;
+    intent__discountPercentage 15 ;
+    intent__customerSegment "premium" ;
+    intent__targetIntent "work_from_home" ;
+    intent__aiRecommendationWeight "0.92"^^xsd:decimal ;
+    sch:priceSpecification [
+        a sch:UnitPriceSpecification ;
+        sch:price "55.49"^^xsd:decimal ;
+        sch:priceCurrency "EUR" ;
+        intent__originalPrice "65.28"^^xsd:decimal ;
+        intent__savings "9.79"^^xsd:decimal
+    ] .
+
+# ==========================================
+# PHASE 3 BUNDLE 2: Family Connect Bundle
+# ==========================================
+
+<https://intent-platform.example.com/bundle/BUNDLE-FAMILY>
+    a sch:Offer , tmf620:BundledProductOffering ;
+    sch:name "Family Connect Bundle"@en ;
+    sch:description "Complete connectivity for the whole family with ultra-fast broadband, mobile data, and TV entertainment"@en ;
+    sch:identifier "BUNDLE-FAMILY" ;
+    sch:sku "BUNDLE-FAMILY" ;
+    tmf620:bundleId "BUNDLE-FAMILY" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "2.0" ;
+    dc:created "2025-01-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent__popularityScore 88 ;
+    intent__discountPercentage 20 ;
+    intent__customerSegment "standard" ;
+    intent__targetIntent "family" ;
+    intent__aiRecommendationWeight "0.88"^^xsd:decimal ;
+    sch:priceSpecification [
+        a sch:UnitPriceSpecification ;
+        sch:price "79.99"^^xsd:decimal ;
+        sch:priceCurrency "EUR" ;
+        intent__originalPrice "99.99"^^xsd:decimal ;
+        intent__savings "20.00"^^xsd:decimal
+    ] .
+
+# ==========================================
+# PHASE 3 BUNDLE 3: Ultimate Gaming Bundle
+# ==========================================
+
+<https://intent-platform.example.com/bundle/BUNDLE-GAMING>
+    a sch:Offer , tmf620:BundledProductOffering ;
+    sch:name "Ultimate Gaming Bundle"@en ;
+    sch:description "High-speed internet and mobile for gamers with ultra-low latency and priority support"@en ;
+    sch:identifier "BUNDLE-GAMING" ;
+    sch:sku "BUNDLE-GAMING" ;
+    tmf620:bundleId "BUNDLE-GAMING" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "1.5" ;
+    dc:created "2025-02-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent__popularityScore 85 ;
+    intent__discountPercentage 18 ;
+    intent__customerSegment "premium" ;
+    intent__targetIntent "gaming" ;
+    intent__aiRecommendationWeight "0.85"^^xsd:decimal ;
+    sch:priceSpecification [
+        a sch:UnitPriceSpecification ;
+        sch:price "73.79"^^xsd:decimal ;
+        sch:priceCurrency "EUR" ;
+        intent__originalPrice "89.98"^^xsd:decimal ;
+        intent__savings "16.19"^^xsd:decimal
+    ] .
+
+# ==========================================
+# PHASE 3 BUNDLE 4: Entertainment Streaming Bundle
+# ==========================================
+
+<https://intent-platform.example.com/bundle/BUNDLE-STREAMING>
+    a sch:Offer , tmf620:BundledProductOffering ;
+    sch:name "Entertainment Streaming Bundle"@en ;
+    sch:description "Perfect for streaming enthusiasts with ultra-fast broadband, premium TV channels, and mobile data"@en ;
+    sch:identifier "BUNDLE-STREAMING" ;
+    sch:sku "BUNDLE-STREAMING" ;
+    tmf620:bundleId "BUNDLE-STREAMING" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "2.0" ;
+    dc:created "2025-03-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent__popularityScore 90 ;
+    intent__discountPercentage 22 ;
+    intent__customerSegment "premium" ;
+    intent__targetIntent "streaming" ;
+    intent__aiRecommendationWeight "0.90"^^xsd:decimal ;
+    sch:priceSpecification [
+        a sch:UnitPriceSpecification ;
+        sch:price "85.59"^^xsd:decimal ;
+        sch:priceCurrency "EUR" ;
+        intent__originalPrice "109.99"^^xsd:decimal ;
+        intent__savings "24.40"^^xsd:decimal
+    ] .
+
+# ==========================================
+# BUNDLE-PRODUCT RELATIONSHIPS
+# ==========================================
+
+# Work-from-Home Premium Bundle includes:
+# 1. Broadband 500Mbps (position 1, recommended)
+# 2. Mobile 50GB (position 2, recommended)
+
+<https://intent-platform.example.com/bundle/BUNDLE-WFH-PREMIUM>
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-BB-500> ;
+        intent__position 1 ;
+        intent__recommended true
+    ] ;
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-MOB-50GB> ;
+        intent__position 2 ;
+        intent__recommended true
+    ] .
+
+# Family Connect Bundle includes:
+# 1. Broadband 1Gbps (position 1, recommended)
+# 2. Mobile 50GB (position 2, recommended)
+# 3. TV Basic (position 3, optional)
+
+<https://intent-platform.example.com/bundle/BUNDLE-FAMILY>
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-BB-1GB> ;
+        intent__position 1 ;
+        intent__recommended true
+    ] ;
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-MOB-50GB> ;
+        intent__position 2 ;
+        intent__recommended true
+    ] ;
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-TV-BASIC> ;
+        intent__position 3 ;
+        intent__recommended false
+    ] .
+
+# Ultimate Gaming Bundle includes:
+# 1. Broadband 1Gbps (position 1, recommended)
+# 2. Mobile Unlimited (position 2, recommended)
+
+<https://intent-platform.example.com/bundle/BUNDLE-GAMING>
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-BB-1GB> ;
+        intent__position 1 ;
+        intent__recommended true
+    ] ;
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-MOB-UNL> ;
+        intent__position 2 ;
+        intent__recommended true
+    ] .
+
+# Entertainment Streaming Bundle includes:
+# 1. Broadband 1Gbps (position 1, recommended)
+# 2. TV Premium (position 2, recommended)
+# 3. Mobile 50GB (position 3, optional)
+
+<https://intent-platform.example.com/bundle/BUNDLE-STREAMING>
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-BB-1GB> ;
+        intent__position 1 ;
+        intent__recommended true
+    ] ;
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-TV-PREMIUM> ;
+        intent__position 2 ;
+        intent__recommended true
+    ] ;
+    tmf620:bundledProductOffering [
+        a tmf620:BundledProductOfferingOption ;
+        tmf620:bundledProductOfferingRef <https://intent-platform.example.com/product/PROD-MOB-50GB> ;
+        intent__position 3 ;
+        intent__recommended false
+    ] .
+
+# ==========================================
+# REVERSE RELATIONSHIPS: Products to Bundles
+# ==========================================
+
+# Broadband 500Mbps is in WFH bundle
+<https://intent-platform.example.com/product/PROD-BB-500>
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-WFH-PREMIUM> .
+
+# Broadband 1Gbps is in Family, Gaming, and Streaming bundles
+<https://intent-platform.example.com/product/PROD-BB-1GB>
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-FAMILY> ;
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-GAMING> ;
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-STREAMING> .
+
+# Mobile 50GB is in WFH, Family, and Streaming bundles
+<https://intent-platform.example.com/product/PROD-MOB-50GB>
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-WFH-PREMIUM> ;
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-FAMILY> ;
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-STREAMING> .
+
+# Mobile Unlimited is in Gaming bundle
+<https://intent-platform.example.com/product/PROD-MOB-UNL>
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-GAMING> .
+
+# TV Basic is in Family bundle
+<https://intent-platform.example.com/product/PROD-TV-BASIC>
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-FAMILY> .
+
+# TV Premium is in Streaming bundle
+<https://intent-platform.example.com/product/PROD-TV-PREMIUM>
+    intent__includedinBundle <https://intent-platform.example.com/bundle/BUNDLE-STREAMING> .
