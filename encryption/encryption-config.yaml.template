@@ -1,0 +1,63 @@
+# Kubernetes etcd Encryption Configuration
+# Phase 2 Security Hardening: Encryption at Rest
+#
+# This file encrypts Kubernetes secrets and configmaps at rest in etcd.
+# It uses AESCBC (AES-256 CBC mode) for strong encryption.
+#
+# IMPORTANT: Replace <BASE64_ENCRYPTION_KEY> with the key from generate-keys.sh
+#
+# Usage:
+#   1. Run: ./encryption/generate-keys.sh
+#   2. Copy the etcd-encryption-key.txt content to <BASE64_ENCRYPTION_KEY> below
+#   3. Save as encryption-config.yaml (without .template extension)
+#   4. Copy to Kind cluster: docker cp encryption-config.yaml local-k8s-control-plane:/etc/kubernetes/pki/
+#   5. Update kube-apiserver manifest to use this config
+#
+# Security Notes:
+#   - Key rotation: Quarterly (90 days)
+#   - Algorithm: AESCBC (AES-256 CBC with PKCS#7 padding)
+#   - Fallback: identity provider for reading old unencrypted data during migration
+#   - Order matters: New data encrypted with aescbc, old data readable with identity
+
+apiVersion: apiserver.config.k8s.io/v1
+kind: EncryptionConfiguration
+resources:
+  # Encrypt secrets
+  - resources:
+      - secrets
+    providers:
+      # Primary encryption provider (AES-CBC)
+      - aescbc:
+          keys:
+            - name: key1
+              # REPLACE THIS with content from encryption/etcd-encryption-key.txt
+              secret: <BASE64_ENCRYPTION_KEY>
+      # Fallback for reading old unencrypted secrets during migration
+      - identity: {}
+
+  # Encrypt configmaps
+  - resources:
+      - configmaps
+    providers:
+      - aescbc:
+          keys:
+            - name: key1
+              # REPLACE THIS with content from encryption/etcd-encryption-key.txt
+              secret: <BASE64_ENCRYPTION_KEY>
+      - identity: {}
+
+# Key Rotation Configuration
+# When rotating keys, add new key as first entry, keep old key as second:
+#
+# Example after rotation:
+#   - aescbc:
+#       keys:
+#         - name: key2         # NEW KEY (primary)
+#           secret: <NEW_BASE64_KEY>
+#         - name: key1         # OLD KEY (for decrypting old data)
+#           secret: <OLD_BASE64_KEY>
+#   - identity: {}
+#
+# Then force re-encryption:
+#   kubectl get secrets --all-namespaces -o json | kubectl replace -f -
+#   kubectl get configmaps --all-namespaces -o json | kubectl replace -f -

@@ -52,3 +52,18 @@ neo4j-data/
 
 # Serena tool files
 .serena/
+
+# Encryption keys and sensitive data (Phase 2 Security Hardening)
+encryption/*.txt
+encryption/*.key
+encryption/*.pem
+encryption/key-metadata.json
+encryption/encryption-config.yaml
+encryption/backups/
+encryption/pre-migration-backup-*/
+encryption/*.tar.gz
+encryption/*.tar.gz.enc
+
+# Claude and Specify directories
+.claude/
+.specify/
