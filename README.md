@@ -10,6 +10,7 @@ AI-powered business intent processing system using Claude AI and microservices a
 - kubectl configured
 - Docker installed
 - Anthropic API key
+- **Optional:** istioctl (for Istio service mesh features)
 
 ### Security Setup (Required)
 
@@ -67,6 +68,13 @@ kubectl wait --for=condition=ready pod -l app=neo4j -n intent-platform --timeout
 # Populate Neo4j
 kubectl cp ../src/populate-neo4j.cypher intent-platform/$(kubectl get pod -n intent-platform -l app=neo4j -o jsonpath='{.items[0].metadata.name}'):/tmp/populate.cypher
 kubectl exec -n intent-platform deployment/neo4j -- cypher-shell -u neo4j -p password123 -f /tmp/populate.cypher
+
+# 7. Deploy Istio Service Mesh (optional but recommended)
+# See business-intent-agent/k8s/istio/README.md for complete setup guide
+istioctl install --set profile=demo -y
+kubectl label namespace intent-platform istio-injection=enabled
+kubectl apply -f business-intent-agent/k8s/istio/
+kubectl rollout restart deployment -n intent-platform
 ```
 
 ## 🔌 Access Services
@@ -79,6 +87,19 @@ kubectl port-forward -n intent-platform svc/business-intent-agent-service 8080:8
 
 # Neo4j Browser
 kubectl port-forward -n intent-platform svc/neo4j-service 7474:7474 7687:7687
+
+# With Istio Service Mesh:
+# Kiali (Service Mesh Dashboard)
+kubectl port-forward svc/kiali -n istio-system 20001:20001
+
+# Jaeger (Distributed Tracing)
+kubectl port-forward svc/tracing -n istio-system 16686:80
+
+# Prometheus (Metrics)
+kubectl port-forward svc/prometheus -n istio-system 9090:9090
+
+# Grafana (Dashboards)
+kubectl port-forward svc/grafana -n istio-system 3000:3000
 ```
 
 ### Test Intent Processing
@@ -121,13 +142,16 @@ k8s/
 - **Database:** Neo4j 5 (Graph Database)
 - **Protocol:** MCP (Model Context Protocol)
 - **Container:** Docker, Kubernetes
-- **Monitoring:** Prometheus metrics (configured)
+- **Service Mesh:** Istio (mTLS, observability, traffic management)
+- **Monitoring:** Prometheus, Grafana, Kiali, Jaeger
 
 ## 📚 Documentation
 
 - [DEPLOYMENT_SUMMARY.md](DEPLOYMENT_SUMMARY.md) - Complete deployment guide and architecture
 - [business-intent-agent/README.md](business-intent-agent/README.md) - Business intent agent details
+- [business-intent-agent/k8s/istio/README.md](business-intent-agent/k8s/istio/README.md) - Istio service mesh setup guide
 - [src/SETUP_GUIDE.md](src/SETUP_GUIDE.md) - Manual setup instructions
+- [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
 
 ## 🔧 Troubleshooting
 
@@ -155,5 +179,6 @@ Vpnet Consulting LLC
 
 ---
 
-**Status:** ✅ Operational
-**Last Updated:** December 26, 2025
+**Status:** ✅ Operational with Istio Service Mesh
+**Version:** 1.4.0
+**Last Updated:** January 10, 2026
