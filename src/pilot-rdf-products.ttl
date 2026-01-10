@@ -1,0 +1,218 @@
+@prefix tmf620: <https://www.tmforum.org/ontologies/tmf620#> .
+@prefix sch: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix intent: <https://intent-platform.example.com/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ==========================================
+# PILOT PRODUCT 1: Broadband 500Mbps
+# ==========================================
+
+<https://intent-platform.example.com/product/PROD-BB-500>
+    a sch:Product, tmf620:ProductOffering ;
+
+    # Basic Information (Schema.org)
+    sch:name "Broadband 500Mbps"@en ;
+    sch:description "High-speed broadband with 500Mbps download and 50Mbps upload"@en ;
+    sch:identifier "PROD-BB-500" ;
+    sch:sku "PROD-BB-500" ;
+
+    # TMF620 Product Offering Properties
+    tmf620:productOfferingId "PROD-BB-500" ;
+    tmf620:productOfferingType "broadband" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "1.0" ;
+    tmf620:validFor [
+        a tmf620:TimePeriod ;
+        tmf620:startDateTime "2025-01-01T00:00:00Z"^^xsd:dateTime ;
+        tmf620:endDateTime "2026-12-31T23:59:59Z"^^xsd:dateTime
+    ] ;
+
+    # Pricing Information (Schema.org)
+    sch:offers [
+        a sch:Offer ;
+        sch:price "39.99"^^xsd:decimal ;
+        sch:priceCurrency "EUR" ;
+        sch:priceValidUntil "2026-12-31"^^xsd:date ;
+        sch:availability sch:InStock ;
+        sch:eligibleRegion "IE" ; # Ireland
+        sch:billingPeriod "P1M" ; # Monthly
+    ] ;
+
+    # Technical Specifications
+    tmf620:productSpecification [
+        a tmf620:ProductSpecification ;
+        sch:name "Broadband Specification"@en ;
+        tmf620:characteristic [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Download Speed"@en ;
+            sch:value "500"^^xsd:integer ;
+            sch:unitCode "Mbps"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Upload Speed"@en ;
+            sch:value "50"^^xsd:integer ;
+            sch:unitCode "Mbps"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Data Cap"@en ;
+            sch:value "Unlimited"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Installation"@en ;
+            sch:value "Professional"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Contract Term"@en ;
+            sch:value "12"^^xsd:integer ;
+            sch:unitCode "months"
+        ]
+    ] ;
+
+    # Category & Classification (SKOS)
+    sch:category [
+        a skos:Concept ;
+        skos:prefLabel "Broadband"@en ;
+        skos:inScheme <https://intent-platform.example.com/taxonomy/products>
+    ] ;
+
+    # Metadata
+    dc:created "2025-01-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+
+    # Custom Intent Platform Properties
+    intent:popularityScore "85"^^xsd:integer ;
+    intent:customerSegment "residential" ;
+    intent:aiRecommendationWeight "0.8"^^xsd:decimal .
+
+
+# ==========================================
+# PILOT PRODUCT 2: Mobile Unlimited
+# ==========================================
+
+<https://intent-platform.example.com/product/PROD-MOB-UNL>
+    a sch:Product, tmf620:ProductOffering ;
+
+    # Basic Information (Schema.org)
+    sch:name "Mobile Unlimited"@en ;
+    sch:description "Unlimited calls, texts, and 5G data with EU roaming"@en ;
+    sch:identifier "PROD-MOB-UNL" ;
+    sch:sku "PROD-MOB-UNL" ;
+
+    # TMF620 Product Offering Properties
+    tmf620:productOfferingId "PROD-MOB-UNL" ;
+    tmf620:productOfferingType "mobile" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "2.1" ;
+    tmf620:validFor [
+        a tmf620:TimePeriod ;
+        tmf620:startDateTime "2025-01-01T00:00:00Z"^^xsd:dateTime ;
+        tmf620:endDateTime "2026-12-31T23:59:59Z"^^xsd:dateTime
+    ] ;
+
+    # Pricing Information (Schema.org)
+    sch:offers [
+        a sch:Offer ;
+        sch:price "29.99"^^xsd:decimal ;
+        sch:priceCurrency "EUR" ;
+        sch:priceValidUntil "2026-12-31"^^xsd:date ;
+        sch:availability sch:InStock ;
+        sch:eligibleRegion "IE" ; # Ireland
+        sch:billingPeriod "P1M" ; # Monthly
+    ] ;
+
+    # Technical Specifications
+    tmf620:productSpecification [
+        a tmf620:ProductSpecification ;
+        sch:name "Mobile Unlimited Specification"@en ;
+        tmf620:characteristic [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Data"@en ;
+            sch:value "Unlimited"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Calls"@en ;
+            sch:value "Unlimited"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "SMS"@en ;
+            sch:value "Unlimited"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Network Type"@en ;
+            sch:value "5G"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "EU Roaming"@en ;
+            sch:value "Included"
+        ] , [
+            a tmf620:ProductSpecCharacteristic ;
+            sch:name "Contract Term"@en ;
+            sch:value "12"^^xsd:integer ;
+            sch:unitCode "months"
+        ]
+    ] ;
+
+    # Category & Classification (SKOS)
+    sch:category [
+        a skos:Concept ;
+        skos:prefLabel "Mobile"@en ;
+        skos:inScheme <https://intent-platform.example.com/taxonomy/products>
+    ] ;
+
+    # Metadata
+    dc:created "2025-02-15T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+
+    # Custom Intent Platform Properties
+    intent:popularityScore "92"^^xsd:integer ;
+    intent:customerSegment "residential" ;
+    intent:aiRecommendationWeight "0.9"^^xsd:decimal .
+
+
+# ==========================================
+# PRODUCT TAXONOMY SCHEME
+# ==========================================
+
+<https://intent-platform.example.com/taxonomy/products>
+    a skos:ConceptScheme ;
+    dc:title "Intent Platform Product Taxonomy"@en ;
+    dc:description "Product classification scheme for the Intent Platform"@en ;
+    dc:created "2025-01-01T00:00:00Z"^^xsd:dateTime .
+
+
+# ==========================================
+# RELATED CONCEPTS & RELATIONSHIPS
+# ==========================================
+
+# Broadband Category
+<https://intent-platform.example.com/category/broadband>
+    a skos:Concept ;
+    skos:prefLabel "Broadband"@en ;
+    skos:altLabel "Internet"@en ;
+    skos:definition "Fixed broadband internet connectivity services"@en ;
+    skos:inScheme <https://intent-platform.example.com/taxonomy/products> ;
+    skos:narrower <https://intent-platform.example.com/product/PROD-BB-500> .
+
+# Mobile Category
+<https://intent-platform.example.com/category/mobile>
+    a skos:Concept ;
+    skos:prefLabel "Mobile"@en ;
+    skos:altLabel "Cellular", "Wireless"@en ;
+    skos:definition "Mobile cellular telephony and data services"@en ;
+    skos:inScheme <https://intent-platform.example.com/taxonomy/products> ;
+    skos:narrower <https://intent-platform.example.com/product/PROD-MOB-UNL> .
+
+# Related Products (for bundle recommendations)
+<https://intent-platform.example.com/product/PROD-BB-500>
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-MOB-UNL> ;
+    intent:frequentlyBundledWith <https://intent-platform.example.com/product/PROD-MOB-UNL> .
+
+<https://intent-platform.example.com/product/PROD-MOB-UNL>
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-BB-500> ;
+    intent:frequentlyBundledWith <https://intent-platform.example.com/product/PROD-BB-500> .

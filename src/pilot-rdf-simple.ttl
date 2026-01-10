@@ -1,0 +1,51 @@
+@prefix tmf620: <https://www.tmforum.org/ontologies/tmf620#> .
+@prefix sch: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix intent: <https://intent-platform.example.com/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# PILOT PRODUCT 1: Broadband 500Mbps (Simplified)
+<https://intent-platform.example.com/product/PROD-BB-500>
+    a sch:Product , tmf620:ProductOffering ;
+    sch:name "Broadband 500Mbps"@en ;
+    sch:description "High-speed broadband with 500Mbps download and 50Mbps upload"@en ;
+    sch:identifier "PROD-BB-500" ;
+    sch:sku "PROD-BB-500" ;
+    tmf620:productOfferingId "PROD-BB-500" ;
+    tmf620:productOfferingType "broadband" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "1.0" ;
+    dc:created "2025-01-01T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent:popularityScore 85 ;
+    intent:customerSegment "residential" ;
+    intent:aiRecommendationWeight "0.8"^^xsd:decimal .
+
+# PILOT PRODUCT 2: Mobile Unlimited (Simplified)
+<https://intent-platform.example.com/product/PROD-MOB-UNL>
+    a sch:Product , tmf620:ProductOffering ;
+    sch:name "Mobile Unlimited"@en ;
+    sch:description "Unlimited calls, texts, and 5G data with EU roaming"@en ;
+    sch:identifier "PROD-MOB-UNL" ;
+    sch:sku "PROD-MOB-UNL" ;
+    tmf620:productOfferingId "PROD-MOB-UNL" ;
+    tmf620:productOfferingType "mobile" ;
+    tmf620:lifecycleStatus "Active" ;
+    tmf620:version "2.1" ;
+    dc:created "2025-02-15T00:00:00Z"^^xsd:dateTime ;
+    dc:modified "2026-01-10T00:00:00Z"^^xsd:dateTime ;
+    dc:creator "Intent Platform Team" ;
+    intent:popularityScore 92 ;
+    intent:customerSegment "residential" ;
+    intent:aiRecommendationWeight "0.9"^^xsd:decimal .
+
+# Product Relationships
+<https://intent-platform.example.com/product/PROD-BB-500>
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-MOB-UNL> ;
+    intent:frequentlyBundledWith <https://intent-platform.example.com/product/PROD-MOB-UNL> .
+
+<https://intent-platform.example.com/product/PROD-MOB-UNL>
+    sch:isRelatedTo <https://intent-platform.example.com/product/PROD-BB-500> ;
+    intent:frequentlyBundledWith <https://intent-platform.example.com/product/PROD-BB-500> .
