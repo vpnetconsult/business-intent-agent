@@ -1,19 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: knowledge-graph-mcp
+  name: knowledge-graph-mcp-v2-canary
   namespace: intent-platform
   labels:
     app: knowledge-graph-mcp
+    version: "2.0.0"
+    deployment: canary
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: knowledge-graph-mcp
+      version: "2.0.0"
   template:
     metadata:
       labels:
         app: knowledge-graph-mcp
+        version: "2.0.0"
+        deployment: canary
     spec:
       containers:
       - name: knowledge-graph-mcp
@@ -59,21 +64,7 @@ spec:
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /health
+            path: /ready
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 5
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: knowledge-graph-mcp-service
-  namespace: intent-platform
-spec:
-  selector:
-    app: knowledge-graph-mcp
-  ports:
-  - port: 8080
-    targetPort: 8080
-    name: http
-  type: ClusterIP

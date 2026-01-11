@@ -1,0 +1,37 @@
+{
+  "name": "knowledge-graph-mcp-service",
+  "version": "2.0.0",
+  "description": "Knowledge Graph MCP Service with RDF/TMF620 support",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node server.ts",
+    "test": "jest",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:integration": "jest --testPathPattern=integration"
+  },
+  "keywords": [
+    "mcp",
+    "neo4j",
+    "rdf",
+    "tmf620",
+    "schema.org",
+    "knowledge-graph"
+  ],
+  "author": "VPNet Consult",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "neo4j-driver": "^5.15.0",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  }
+}
