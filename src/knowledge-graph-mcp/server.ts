@@ -14,10 +14,15 @@ import { createMetrics, recordMetric } from './metrics';
 const app = express();
 app.use(express.json());
 
-// Neo4j connection
+// Neo4j connection - credentials must be provided via environment variables
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER = process.env.NEO4J_USER || 'neo4j';
-const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'password123';
+const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD;
+
+if (!NEO4J_PASSWORD) {
+  console.error('FATAL: NEO4J_PASSWORD environment variable is required');
+  process.exit(1);
+}
 
 const driver: Driver = neo4j.driver(
   NEO4J_URI,

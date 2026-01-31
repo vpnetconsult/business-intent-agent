@@ -42,7 +42,10 @@ spec:
           name: bolt
         env:
         - name: NEO4J_AUTH
-          value: "neo4j/password123"
+          valueFrom:
+            secretKeyRef:
+              name: neo4j-credentials
+              key: NEO4J_AUTH
         - name: NEO4J_PLUGINS
           value: '["apoc", "n10s"]'
         - name: NEO4J_dbms_security_procedures_unrestricted
