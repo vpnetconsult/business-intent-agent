@@ -28,14 +28,14 @@ sequenceDiagram
         Note over IP,PII: Step 2: GDPR Compliance
         IP->>PII: maskCustomerProfile(profile)
         PII-->>IP: {masked_name, segment, preferences}
-        Note over PII: Masked: name<br/>Removed: email
+        Note over PII: Masked name, Removed email
     end
 
     %% Step 3: Analyze Intent with LLM
     rect rgb(240, 255, 240)
         Note over IP,Claude: Step 3: LLM Intent Analysis
         IP->>Claude: analyzeIntent(intent, maskedProfile)
-        Note over Claude: Reasoning about<br/>customer needs
+        Note over Claude: Reasoning about customer needs
         Claude-->>IP: {tags, product_types, confidence: 0.92}
     end
 
@@ -50,7 +50,7 @@ sequenceDiagram
     rect rgb(255, 240, 245)
         Note over IP,KG: Step 5: Knowledge Graph Query
         IP->>KG: find_related_products({base_products})
-        Note over KG: RDF/SPARQL Query<br/>Semantic relationships
+        Note over KG: RDF/SPARQL Query - Semantic relationships
         KG-->>IP: [{bundle_id, rdf_uri, discount_percent}]
     end
 
@@ -58,7 +58,7 @@ sequenceDiagram
     rect rgb(240, 255, 240)
         Note over IP,Claude: Step 6: LLM Offer Generation
         IP->>Claude: generateOffer({intent, customer, products, bundles})
-        Note over Claude: Personalization<br/>reasoning
+        Note over Claude: Personalization reasoning
         Claude-->>IP: {selected_products, recommended_discounts}
     end
 
@@ -70,7 +70,7 @@ sequenceDiagram
     end
 
     IP-->>Client: {intent_analysis, offer, quote, processing_time}
-    Note over Client,IP: Complete response with<br/>personalized offer
+    Note over Client,IP: Complete response with personalized offer
 ```
 
 ## Flow Summary

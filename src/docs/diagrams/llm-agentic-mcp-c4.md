@@ -106,8 +106,8 @@ C4Component
 ```mermaid
 flowchart TB
     subgraph Input
-        A[Customer Intent<br/>"Need internet for WFH"]
-        B[Customer ID<br/>CUST-123]
+        A["Customer Intent: Need internet for WFH"]
+        B["Customer ID: CUST-123"]
     end
 
     subgraph "MCP Layer"
