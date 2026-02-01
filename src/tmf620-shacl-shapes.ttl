@@ -1,0 +1,315 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix tmf620: <https://www.tmforum.org/ontologies/tmf620#> .
+@prefix sch: <http://schema.org/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix intent: <https://intent-platform.example.com/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# ==========================================
+# SHACL Validation Shapes for TMF620
+# Intent Platform - Version 2.x
+# ==========================================
+
+# Shape for TMF620 ProductOffering
+intent:ProductOfferingShape
+    a sh:NodeShape ;
+    sh:targetClass tmf620:ProductOffering ;
+    sh:name "TMF620 ProductOffering Shape" ;
+    sh:description "Validation rules for TM Forum TMF620 ProductOffering entities" ;
+
+    # Required properties
+    sh:property [
+        sh:path tmf620:productOfferingId ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^PROD-[A-Z0-9-]+$" ;
+        sh:message "ProductOffering must have exactly one productOfferingId matching pattern PROD-*"
+    ] ;
+
+    sh:property [
+        sh:path tmf620:productOfferingType ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:in ( "broadband" "mobile" "tv" "bundle" ) ;
+        sh:message "ProductOffering must have exactly one productOfferingType from allowed values"
+    ] ;
+
+    sh:property [
+        sh:path tmf620:lifecycleStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:in ( "Active" "Deprecated" "Retired" "Draft" ) ;
+        sh:message "ProductOffering must have exactly one lifecycleStatus from allowed values"
+    ] ;
+
+    sh:property [
+        sh:path sch:name ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:message "Product must have exactly one name"
+    ] ;
+
+    sh:property [
+        sh:path sch:identifier ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Product must have exactly one identifier"
+    ] ;
+
+    # Optional but recommended properties
+    sh:property [
+        sh:path sch:description ;
+        sh:maxCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:message "Product should have at most one description"
+    ] ;
+
+    sh:property [
+        sh:path tmf620:version ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^\\d+\\.\\d+$" ;
+        sh:message "Version should match pattern X.Y"
+    ] ;
+
+    sh:property [
+        sh:path dc:created ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "Product must have exactly one creation date"
+    ] ;
+
+    sh:property [
+        sh:path dc:modified ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "Product should have at most one modification date"
+    ] ;
+
+    # Intent Platform custom properties
+    sh:property [
+        sh:path intent:popularityScore ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 100 ;
+        sh:message "PopularityScore must be an integer between 0 and 100"
+    ] ;
+
+    sh:property [
+        sh:path intent:aiRecommendationWeight ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 1.0 ;
+        sh:message "AI recommendation weight must be a decimal between 0.0 and 1.0"
+    ] ;
+
+    sh:property [
+        sh:path intent:customerSegment ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:in ( "premium" "standard" "basic" "residential" ) ;
+        sh:message "Customer segment must be one of: premium, standard, basic, residential"
+    ] ;
+
+    sh:property [
+        sh:path intent:priceAmount ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minExclusive 0.0 ;
+        sh:message "Price amount must be a positive decimal"
+    ] ;
+
+    sh:property [
+        sh:path intent:priceCurrency ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^[A-Z]{3}$" ;
+        sh:message "Price currency must be a 3-letter ISO currency code"
+    ] .
+
+# ==========================================
+# Shape for TMF620 BundledProductOffering
+# ==========================================
+
+intent:BundledProductOfferingShape
+    a sh:NodeShape ;
+    sh:targetClass tmf620:BundledProductOffering ;
+    sh:name "TMF620 BundledProductOffering Shape" ;
+    sh:description "Validation rules for TM Forum TMF620 BundledProductOffering entities" ;
+
+    # Required properties
+    sh:property [
+        sh:path tmf620:bundleId ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^BUNDLE-[A-Z0-9-]+$" ;
+        sh:message "Bundle must have exactly one bundleId matching pattern BUNDLE-*"
+    ] ;
+
+    sh:property [
+        sh:path tmf620:lifecycleStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:in ( "Active" "Deprecated" "Retired" "Draft" ) ;
+        sh:message "Bundle must have exactly one lifecycleStatus from allowed values"
+    ] ;
+
+    sh:property [
+        sh:path sch:name ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:message "Bundle must have exactly one name"
+    ] ;
+
+    sh:property [
+        sh:path sch:identifier ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Bundle must have exactly one identifier"
+    ] ;
+
+    # Bundle-specific properties
+    sh:property [
+        sh:path intent:discountPercentage ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 100 ;
+        sh:message "Discount percentage must be an integer between 0 and 100"
+    ] ;
+
+    sh:property [
+        sh:path intent:bundlePrice ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minExclusive 0.0 ;
+        sh:message "Bundle price must be a positive decimal"
+    ] ;
+
+    sh:property [
+        sh:path intent:originalPrice ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minExclusive 0.0 ;
+        sh:message "Original price must be a positive decimal"
+    ] ;
+
+    sh:property [
+        sh:path intent:savings ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ;
+        sh:message "Savings must be a non-negative decimal"
+    ] ;
+
+    sh:property [
+        sh:path intent:targetIntent ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:in ( "work_from_home" "family" "gaming" "streaming" "entertainment" ) ;
+        sh:message "Target intent must be one of the allowed intent types"
+    ] ;
+
+    # Bundle must include at least 2 products
+    sh:property [
+        sh:path tmf620:includes ;
+        sh:minCount 2 ;
+        sh:class tmf620:ProductOffering ;
+        sh:message "Bundle must include at least 2 products"
+    ] ;
+
+    # Metadata properties
+    sh:property [
+        sh:path dc:created ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "Bundle must have exactly one creation date"
+    ] ;
+
+    sh:property [
+        sh:path intent:popularityScore ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 100 ;
+        sh:message "PopularityScore must be an integer between 0 and 100"
+    ] ;
+
+    sh:property [
+        sh:path intent:aiRecommendationWeight ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 1.0 ;
+        sh:message "AI recommendation weight must be a decimal between 0.0 and 1.0"
+    ] .
+
+# ==========================================
+# Business Rules (Cypher-based validations)
+# ==========================================
+
+# Rule 1: Bundle price must be less than original price
+# Cypher validation:
+# MATCH (b:tmf620__BundledProductOffering)
+# WHERE b.intent__bundlePrice >= b.intent__originalPrice
+# RETURN b.tmf620__bundleId AS invalidBundle,
+#        b.intent__bundlePrice AS bundlePrice,
+#        b.intent__originalPrice AS originalPrice
+
+# Rule 2: Savings should equal originalPrice - bundlePrice
+# Cypher validation:
+# MATCH (b:tmf620__BundledProductOffering)
+# WHERE abs((b.intent__originalPrice - b.intent__bundlePrice) - b.intent__savings) > 0.01
+# RETURN b.tmf620__bundleId AS invalidBundle,
+#        b.intent__originalPrice - b.intent__bundlePrice AS calculatedSavings,
+#        b.intent__savings AS declaredSavings
+
+# Rule 3: Product must belong to exactly one product type
+# Cypher validation:
+# MATCH (p:sch__Product)
+# WHERE NOT p.tmf620__productOfferingType IN ['broadband', 'mobile', 'tv']
+# RETURN p.sch__identifier AS invalidProduct,
+#        p.tmf620__productOfferingType AS invalidType
+
+# Rule 4: Bundle must include at least 2 products
+# Cypher validation:
+# MATCH (b:tmf620__BundledProductOffering)
+# OPTIONAL MATCH (b)-[:tmf620__includes]->(p:sch__Product)
+# WITH b, count(p) AS productCount
+# WHERE productCount < 2
+# RETURN b.tmf620__bundleId AS invalidBundle,
+#        productCount
+
+# Rule 5: Upgrade relationships must have positive price difference
+# Cypher validation:
+# MATCH (p1)-[r:intent__upgradesTo]->(p2)
+# WHERE r.intent__upgradePriceDifference <= 0
+# RETURN p1.sch__identifier AS fromProduct,
+#        p2.sch__identifier AS toProduct,
+#        r.intent__upgradePriceDifference AS invalidPriceDiff

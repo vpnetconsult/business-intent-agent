@@ -19,6 +19,11 @@ metadata:
     app: neo4j
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: neo4j
@@ -37,11 +42,14 @@ spec:
           name: bolt
         env:
         - name: NEO4J_AUTH
-          value: "neo4j/password123"
+          valueFrom:
+            secretKeyRef:
+              name: neo4j-credentials
+              key: NEO4J_AUTH
         - name: NEO4J_PLUGINS
-          value: '["apoc"]'
+          value: '["apoc", "n10s"]'
         - name: NEO4J_dbms_security_procedures_unrestricted
-          value: "apoc.*"
+          value: "apoc.*,n10s.*"
         - name: NEO4J_server_config_strict__validation_enabled
           value: "false"
         volumeMounts:
